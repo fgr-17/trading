@@ -11,12 +11,24 @@ class homebroker_auth:
         self.pwd = pwd
         self.acc = acc
 
+    def print(self):
+        print("DNI:{}".format(self.dni))
+        print("usuario:{}".format(self.usr))
+        print("password:{}".format(self.pwd))
+        print("cuenta:{}".format(self.acc))
+
     def save_file(self):
         fd = open(self.auth_file, "w")
-        fd.write("{},{},{},{}".format(self.dni, self.usr, self.pwd, self.acc))
-        fd.close()
+        if(fd != FileNotFoundError):
+            fd.write("{},{},{},{}".format(self.dni, self.usr, self.pwd, self.acc))
+            fd.close()
 
-    # def read_file(self):
+    def read_file(self):
+        fd = open(self.auth_file, "r")
+        if(fd != FileNotFoundError):
+            self.dni, self.usr, self.pwd, self.acc = fd.read().split()
+            self.print()
+
 
 
 class homebroker:
@@ -33,7 +45,7 @@ class homebroker:
 
 
     def print_auth_data(self):
-        print(self.auth.dni)
+        self.auth.read_file()
 
 
 hb = homebroker()
