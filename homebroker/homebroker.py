@@ -1,11 +1,10 @@
-#!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 from ast import arg
 
 class hb_auth:
     """pyhomebroker auth data"""
 
-    auth_file="Authfile"
+    auth_file="./bin/Authfile"
 
     def __init__(self, *args):
         if(self.read_file() != None):
@@ -23,7 +22,7 @@ class hb_auth:
         self.usr = input("Usuario:")
         self.pwd = input("Password:")
         self.acc = input("Nro. cuenta comitente:")
-        self.auth.save_file()
+        self.save_file()
 
     def print(self):
         print("DNI:{}".format(self.dni))
@@ -55,6 +54,3 @@ class homebroker:
             
     def print_auth_data(self):
         self.auth.print()
-
-hb = homebroker()
-hb.print_auth_data()
