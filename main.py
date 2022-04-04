@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 
-import homebroker as hb
+import broker as brk
 
-cocos_access = hb.homebroker()
-cocos_access.print_auth_data()
+cocos_brk = brk.Broker(265)
+cocos_brk.print_auth_data()
