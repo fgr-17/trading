@@ -10,7 +10,14 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install pyhomeb
 pip install pyhomebroker --upgrade --no-cache-dir
 ```
 
-Install pycodestyle check code files.
+Use pip to install pycodestyle and pylint:
+
+```bash
+pip install pycodestyle
+pip install pylint
+```
+
+ to pylint --fail-under=7 *.pycheck code files.
 
 
 ## Contributors
