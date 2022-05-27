@@ -16,6 +16,7 @@ lint() {
     printf "Linting source files ...\n"
     printf "===================================\n\n"
     pylint ../
+    return $?
 }
 
 test() {
@@ -23,6 +24,7 @@ test() {
     printf "Running unit tests ...\n"
     printf "===================================\n\n"
     pytest ../
+    return $?
 }
 
 
