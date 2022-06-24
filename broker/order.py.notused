@@ -1,0 +1,30 @@
+"""
+Basic order class - not still used
+"""
+
+
+class Order:
+    """
+    Basic stock order class
+    """
+
+    def __init__(self, symbol, settlement, price, size):
+        """
+        necessary fields to create the object
+        """
+        self.symbol = symbol
+        self.settlement = settlement
+        self.price = price
+        self.size = size
+
+    # def sell(self):
+    #     """
+    #     todo sell method
+    #     """
+    #     return
+
+    # def buy(self):
+    #     """
+    #     todo buy method
+    #     """
+    #     return

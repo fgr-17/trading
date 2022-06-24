@@ -2,27 +2,22 @@
 
 
 function style() {
-    printf "\n===================================\n"
     printf "Checking code style ...\n"
-    printf "===================================\n\n"
-    pycodestyle --show-source --show-pep8 --format=pylint ../
-    pycodestyle --format=pylint ../
+    # pycodestyle --show-source --show-pep8 --format=pylint ../
+    pycodestyle --format=pylint ../main.py
+    pycodestyle --format=pylint ../broker
     return $?
 }
 
 
 lint() {
-    printf "\n===================================\n"
     printf "Linting source files ...\n"
-    printf "===================================\n\n"
-    pylint ../
+    pylint ../broker
     return $?
 }
 
 test() {
-    printf "\n===================================\n"
     printf "Running unit tests ...\n"
-    printf "===================================\n\n"
     pytest ../
     return $?
 }
@@ -33,7 +28,22 @@ MAIN_FILE=main.py
 
 
 style
+if [ $? -ne 0 ]; then
+    printf "Please check code style before continue...\n"
+    exit 1
+fi
+
 lint
+if [ $? -ne 0 ]; then
+    printf "Please check lint issues before continue...\n"
+    exit 1
+fi
+
 test
+if [ $? -ne 0 ]; then
+    printf "Please test cases before continue...\n"
+    exit 1
+fi
 
-
+cd ..
+./${MAIN_FILE}

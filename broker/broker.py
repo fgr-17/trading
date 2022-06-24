@@ -23,11 +23,14 @@ class HbAuth:
 
     auth_file = "./bin/Authfile"
 
-    def __init__(self, *args):
+    def __init__(self):
         if self.read_file() is not None:
             self.input_account_data()
 
     def input_account_data(self):
+        """
+        user enters data manually
+        """
         print("___ Ingreso cuenta ___")
         self.dni = input("DNI:")
         self.usr = input("User:")
@@ -36,25 +39,32 @@ class HbAuth:
         self.save_file()
 
     def print(self):
-        print("DNI:{}".format(self.dni))
-        print("usuario:{}".format(self.usr))
-        print("password:{}".format(self.pwd))
-        print("cuenta:{}".format(self.acc))
+        """
+        show auth info
+        """
+        print(f'DNI:{self.dni}')
+        print(f'usuario:{self.usr}')
+        print(f'password:{self.pwd}')
+        print(f'cuenta:{self.acc}')
 
     def save_file(self):
-        fd = open(self.auth_file, "w")
-        if(fd != FileNotFoundError):
-            fd.write("{},{},{},{}".format(self.dni, self.usr,
-                                          self.pwd, self.acc))
-            fd.close()
+        """
+        save file with auth info
+        """
+        with open(self.auth_file, "w", encoding="utf8") as file_desc:
+            file_desc.write(f'{self.dni},{self.usr},{self.pwd},{self.acc}')
+            file_desc.close()
 
     def read_file(self):
+        """
+        Read auth file
+        """
         try:
-            fd = open(self.auth_file, "r")
-            if(fd != FileNotFoundError):
-                self.dni, self.usr, self.pwd, self.acc = fd.read().split(',')
-            else:
-                return 1
+            with open(self.auth_file, "w", encoding="utf8") as file_desc:
+                self.dni, self.usr, self.pwd,\
+                    self.acc = file_desc.read().split(',')
+                return 0
+
         except IOError:
             return 2
 
@@ -65,28 +75,37 @@ class HbInterface:
     """
 
     def __init__(self):
+        """
+        Create the basic connection
+        """
         self.auth = HbAuth()
 
     def print_auth_data(self):
+        """
+        print all the auth data
+        """
         self.auth.print()
 
     # traer valores de la db
     @staticmethod
     def round_price(price):
+        """
+        static method of rounding price
+        """
         decimals = price % 1
         price_no_decimals = price//1
 
         if (price > 250) and (decimals != 0.5):
             price = round(price)
 
-        elif (price > 100) and (price <= 250)\
+        elif (100 < price <= 250)\
                 and (decimals not in [0, .25, .5, .75]):
 
             if decimals < .25:
                 price = price_no_decimals
-            elif decimals > .25 and decimals < .5:
+            elif .25 < decimals < .5:
                 price = price_no_decimals + 0.25
-            elif decimals > .5 and decimals < .75:
+            elif .5 < decimals < .75:
                 price = price_no_decimals + 0.5
             else:
                 price = price_no_decimals + 0.75
@@ -97,21 +116,32 @@ class HbInterface:
 class Broker(HbInterface):
 
     def __init__(self, code):
+        """
+        Basic constructor
+        """
         super().__init__()
         self.code = code
 
     def start_session(self):
-        self.hb = HomeBroker(self.code)
-        self.hb.auth.login(self.auth.dni, self.auth.usr,
-                           self.auth.pwd, raise_exception=True)
-        self.hb.online.connect()
+        """
+        Init broker session
+        """
+        self.broker = HomeBroker(self.code)
+        self.broker.auth.login(self.auth.dni, 
+            self.auth.usr,self.auth.pwd, raise_exception=True)
+        self.broker.online.connect()
 
     def end_session(self):
-        self.hb.online.disconnect()
+        """
+        close connection
+        """
+        self.broker.online.disconnect()
 
     def get_data_from_ticker(self, ticker, n_days):
-
-        data = self.hb.history.get_daily_history(ticker,
+        """
+        retrieve data from the ticker
+        """
+        data = self.broker.history.get_daily_history(ticker,
                                                  datetime.date.today()
                                                  - datetime.timedelta
                                                  (days=n_days),
@@ -123,6 +153,9 @@ class Broker(HbInterface):
         return data
 
     def get_dataset(self, tickers, n_days):
+        """
+        get the entire dataset
+        """
         df = []
         for t in tickers:
             ticker_data = self.get_data_from_ticker(t, n_days)
@@ -133,10 +166,16 @@ class Broker(HbInterface):
         return pd.concat(df, 1)
 
     def get_current_price(self, ticker):
-        return self.hb.history.get_intraday_history(
+        """
+        get current price of specific
+        """
+        return self.broker.history.get_intraday_history(
             ticker).tail(1).close.values[0]
 
     def get_current_portfolio(self):
+        """
+        retrieve the whole portfolio
+        """
         payload = {'comitente': str(self.auth.acc),
                    'consolida': '0',
                    'proceso': '22',
@@ -147,7 +186,7 @@ class Broker(HbInterface):
                    'comitenteMana': None}
 
         portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta",
-                                  cookies=self.hb.auth.cookies,
+                                  cookies=self.broker.auth.cookies,
                                   json=payload).json()
 
         # portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
@@ -158,6 +197,9 @@ class Broker(HbInterface):
         return portfolio
 
     def get_changes(old_portfolio, new_portfolio):
+        """
+        detect changes between 2 portfolios
+        """
         changes = {}
         old_portfolio = dict([
                     (x[0], [x[1], x[2]]) for x in old_portfolio
@@ -175,6 +217,9 @@ class Broker(HbInterface):
         return changes
 
     def changes2orders(changes, plazo):
+        """
+        Create orders from change list
+        """
         orders = []
         for ticker, price_quantity in changes.items():
             price, quantity = price_quantity
@@ -184,23 +229,35 @@ class Broker(HbInterface):
         return orders
 
     def get_orders(self, old_portfolio, new_portfolio, plazo):
+        """
+        get the orders needed to buy
+        """
         changes = self.get_changes(old_portfolio, new_portfolio)
         orders = self.changes2orders(changes, plazo)
         return orders
 
     def execute_orders(self, orders):
+        """
+        run all the orders
+        """
         for order in orders:
             if order[0] == "V":
-                order_number = self.hb.orders.\
+                order_number = self.broker.orders.\
                                send_sell_order(order[1], order[2],
                                                order[3], int(abs(order[4])))
             elif order[0] == "C":
-                order_number = self.hb.orders.\
+                order_number = self.broker.orders.\
                                send_buy_order(order[1], order[2],
                                               order[3], int(abs(order[4])))
 
     def sell_order(self, symbol, settlement, price, size):
-        o_no = self.hb.orders.send_sell_order(symbol, settlement, price, size)
+        """
+        Sell an specific order
+        """
+        o_no = self.broker.orders.send_sell_order(symbol, settlement, price, size)
 
     def buy_order(self, symbol, settlement, price, size):
-        o_no = self.hb.orders.send_buy_order(symbol, settlement, price, size)
+        """
+        Buy an specific order
+        """
+        o_no = self.broker.orders.send_buy_order(symbol, settlement, price, size)
