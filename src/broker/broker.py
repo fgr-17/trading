@@ -8,6 +8,7 @@ __all__ = ['HbAuth', 'HbInterface', 'Broker']
 __version__ = '0.0.1'
 __author__ = 'fgr-17'
 
+import os
 import datetime
 
 from pyhomebroker import HomeBroker
@@ -21,7 +22,15 @@ class HbAuth:
         pyhomebroker auth data
     """
 
-    auth_file = "./bin/Authfile"
+    BIN_PATH = "../bin"
+
+    try:
+        os.mkdir(BIN_PATH)
+    except OSError as error:
+        # print(error)
+        pass
+
+    auth_file = f'{BIN_PATH}/Authfile'
 
     def __init__(self):
         if self.read_file() is not None:
@@ -129,7 +138,12 @@ class Broker(HbInterface):
         Init broker session
         """
         self.broker = HomeBroker(self.code)
-        self.broker.auth.login(self.auth.dni, self.auth.usr, self.auth.pwd, raise_exception=True)
+
+        try:
+            self.broker.auth.login(self.auth.dni, self.auth.usr, self.auth.pwd, raise_exception=True)
+        except:
+            print('Auth data failed')
+
         self.broker.online.connect()
 
     def end_session(self):

@@ -1,32 +1,29 @@
 #!/bin/bash
 
 MAX_LINE_LENGTH=200
+SOURCE_PATH='../src'
 
 function style() {
     printf "Checking code style ...\n"
     # pycodestyle --show-source --show-pep8 --format=pylint ../
-    pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH ../main.py 
-    pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH ../broker
+    pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH "${SOURCE_PATH}/main.py"
+    pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH "${SOURCE_PATH}/broker"
     return $?
 }
 
-
-lint() {
+function lint() {
     printf "Linting source files ...\n"
-    pylint --max-line-length=$MAX_LINE_LENGTH ../broker
+    pylint --max-line-length=$MAX_LINE_LENGTH "${SOURCE_PATH}/broker"
     return $?
 }
 
-test() {
+function test() {
     printf "Running unit tests ...\n"
-    pytest ../
+    pytest "${SOURCE_PATH}"
     return $?
 }
 
-
-
-MAIN_FILE=main.py
-
+MAIN_FILE="${SOURCE_PATH}/main.py"
 
 style
 if [ $? -ne 0 ]; then
@@ -46,5 +43,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-cd ..
-./${MAIN_FILE}
+${MAIN_FILE}

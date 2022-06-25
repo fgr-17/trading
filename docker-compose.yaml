@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  # https://hub.docker.com/r/itsthenetwork/nfs-server-alpine
+  botjr:
+    build: .devcontainer/
+    container_name: botjr
+    volumes:
+      - .:/workspace
+    stdin_open: true
+    tty: true
