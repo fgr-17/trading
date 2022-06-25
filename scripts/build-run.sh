@@ -1,18 +1,19 @@
 #!/bin/bash
 
+MAX_LINE_LENGTH=200
 
 function style() {
     printf "Checking code style ...\n"
     # pycodestyle --show-source --show-pep8 --format=pylint ../
-    pycodestyle --format=pylint ../main.py
-    pycodestyle --format=pylint ../broker
+    pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH ../main.py 
+    pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH ../broker
     return $?
 }
 
 
 lint() {
     printf "Linting source files ...\n"
-    pylint ../broker
+    pylint --max-line-length=$MAX_LINE_LENGTH ../broker
     return $?
 }
 

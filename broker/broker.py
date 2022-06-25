@@ -4,14 +4,14 @@
     Basic access and management for pyhomebroker APIs
 """
 
-__all__ = ['auth', 'homebroker']
+__all__ = ['HbAuth', 'HbInterface', 'Broker']
 __version__ = '0.0.1'
 __author__ = 'fgr-17'
 
-from ast import arg
+import datetime
+
 from pyhomebroker import HomeBroker
 
-import datetime
 import pandas as pd
 import requests
 
@@ -114,6 +114,7 @@ class HbInterface:
 
 
 class Broker(HbInterface):
+    """ general broker class """
 
     def __init__(self, code):
         """
@@ -121,14 +122,14 @@ class Broker(HbInterface):
         """
         super().__init__()
         self.code = code
+        self.broker = None
 
     def start_session(self):
         """
         Init broker session
         """
         self.broker = HomeBroker(self.code)
-        self.broker.auth.login(self.auth.dni, 
-            self.auth.usr,self.auth.pwd, raise_exception=True)
+        self.broker.auth.login(self.auth.dni, self.auth.usr, self.auth.pwd, raise_exception=True)
         self.broker.online.connect()
 
     def end_session(self):
@@ -142,11 +143,8 @@ class Broker(HbInterface):
         retrieve data from the ticker
         """
         data = self.broker.history.get_daily_history(ticker,
-                                                 datetime.date.today()
-                                                 - datetime.timedelta
-                                                 (days=n_days),
-                                                 datetime.date.today()
-                                                 )
+                                                     datetime.date.today() - datetime.timedelta(days=n_days),
+                                                     datetime.date.today())
 
         data.loc[:, "date"] = pd.to_datetime(data.loc[:, "date"])
         data = data.set_index("date")
@@ -156,14 +154,14 @@ class Broker(HbInterface):
         """
         get the entire dataset
         """
-        df = []
-        for t in tickers:
-            ticker_data = self.get_data_from_ticker(t, n_days)
+        df_ = []
+        for ticker in tickers:
+            ticker_data = self.get_data_from_ticker(ticker, n_days)
             ticker_data = ticker_data.close
-            ticker_data.name = t
-            df.append(ticker_data)
+            ticker_data.name = ticker
+            df_.append(ticker_data)
 
-        return pd.concat(df, 1)
+        return pd.concat(df_, 1)
 
     def get_current_price(self, ticker):
         """
@@ -196,26 +194,28 @@ class Broker(HbInterface):
         # float(x["CANT"]) ) for x in portfolio]
         return portfolio
 
-    def get_changes(old_portfolio, new_portfolio):
-        """
-        detect changes between 2 portfolios
-        """
-        changes = {}
-        old_portfolio = dict([
-                    (x[0], [x[1], x[2]]) for x in old_portfolio
-        ])
+    # @staticmethod
+    # def get_changes(old_portfolio, new_portfolio):
+    #     """
+    #     detect changes between 2 portfolios
+    #     """
+    #     changes = {}
+    #     old_portfolio = dict([
+    #                 (x[0], [x[1], x[2]]) for x in old_portfolio
+    #     ])
 
-        for row in new_portfolio:
-            ticker = row[0]
-            price = row[1]
-            quantity = row[2]
+    #     for row in new_portfolio:
+    #         ticker = row[0]
+    #         price = row[1]
+    #         quantity = row[2]
 
-            if ticker in old_portfolio:
-                changes[ticker] = [price, quantity - old_portfolio[ticker][1]]
-            else:
-                changes[ticker] = [price, quantity]
-        return changes
+    #         if ticker in old_portfolio:
+    #             changes[ticker] = [price, quantity - old_portfolio[ticker][1]]
+    #         else:
+    #             changes[ticker] = [price, quantity]
+    #     return changes
 
+    @staticmethod
     def changes2orders(changes, plazo):
         """
         Create orders from change list
@@ -228,13 +228,13 @@ class Broker(HbInterface):
                 orders.append(order)
         return orders
 
-    def get_orders(self, old_portfolio, new_portfolio, plazo):
-        """
-        get the orders needed to buy
-        """
-        changes = self.get_changes(old_portfolio, new_portfolio)
-        orders = self.changes2orders(changes, plazo)
-        return orders
+    # def get_orders(self, old_portfolio, new_portfolio, plazo):
+    #     """
+    #     get the orders needed to buy
+    #     """
+    #     changes = self.get_changes(old_portfolio, new_portfolio)
+    #     orders = self.changes2orders(changes, plazo)
+    #     return orders
 
     def execute_orders(self, orders):
         """
@@ -249,15 +249,18 @@ class Broker(HbInterface):
                 order_number = self.broker.orders.\
                                send_buy_order(order[1], order[2],
                                               order[3], int(abs(order[4])))
+        return order_number
 
     def sell_order(self, symbol, settlement, price, size):
         """
         Sell an specific order
         """
         o_no = self.broker.orders.send_sell_order(symbol, settlement, price, size)
+        return o_no
 
     def buy_order(self, symbol, settlement, price, size):
         """
         Buy an specific order
         """
         o_no = self.broker.orders.send_buy_order(symbol, settlement, price, size)
+        return o_no
