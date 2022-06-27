@@ -11,7 +11,8 @@ __author__ = 'fgr-17'
 import os
 import datetime
 
-from pyhomebroker import HomeBroker
+from pyhomebroker.common.exceptions import SessionException
+import pyhomebroker as phb
 
 import pandas as pd
 import requests
@@ -22,17 +23,17 @@ class HbAuth:
         pyhomebroker auth data
     """
 
-    BIN_PATH = "../bin"
-
-    try:
-        os.mkdir(BIN_PATH)
-    except OSError as error:
-        # print(error)
-        pass
-
-    auth_file = f'{BIN_PATH}/Authfile'
-
     def __init__(self):
+
+        self.bin_path = "../bin"
+        self.auth_file = f'{self.bin_path}/Authfile'
+
+        try:
+            os.mkdir(self.bin_path)
+        except OSError:
+            # print(error)
+            pass
+
         if self.read_file() is not None:
             self.input_account_data()
 
@@ -137,12 +138,14 @@ class Broker(HbInterface):
         """
         Init broker session
         """
-        self.broker = HomeBroker(self.code)
+        self.broker = phb.HomeBroker(self.code)
 
         try:
             self.broker.auth.login(self.auth.dni, self.auth.usr, self.auth.pwd, raise_exception=True)
-        except:
-            print('Auth data failed')
+        except SessionException as session_exp:
+            print(session_exp)
+        except requests.exceptions.HTTPError as http_exp:
+            print(http_exp)
 
         self.broker.online.connect()
 

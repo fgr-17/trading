@@ -2,7 +2,9 @@
 """Main routine"""
 import broker as brk
 
-cocos_brk = brk.Broker(265)
+
+COCOSAPP_BROKER_ID = 265
+cocos_brk = brk.Broker(COCOSAPP_BROKER_ID)
 
 # todo: pasar a una db
 tickers = [
