@@ -14,6 +14,7 @@ function style() {
 function lint() {
     printf "Linting source files ...\n"
     pylint --max-line-length=$MAX_LINE_LENGTH "${SOURCE_PATH}/broker"
+    pylint --max-line-length=$MAX_LINE_LENGTH "${SOURCE_PATH}/main.py"
     return $?
 }
 
