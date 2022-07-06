@@ -13,7 +13,7 @@ tickers = [
     "TRAN", "TXAR", "VALO", "YPFD"
 ]
 
-cocos_brk.start_session()
+print(cocos_brk.start_session())
 
 # # print(cocos_brk.get_data_from_ticker("ALUA", 3))
 # print(cocos_brk.get_dataset(tickers, 5))
@@ -24,4 +24,4 @@ cocos_brk.start_session()
 
 # print(f'order {cocos_brk.buy_order("ALUA", "48hs", 98.9, 1)}')
 
-cocos_brk.end_session()
+print(cocos_brk.end_session())

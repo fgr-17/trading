@@ -120,14 +120,29 @@ class Broker(HbInterface):
             self.broker.auth.login(self.auth.dni, self.auth.usr, self.auth.pwd, raise_exception=True)
         except SessionException as session_exp:
             print(session_exp)
+            return False
         except requests.exceptions.HTTPError as http_exp:
             print(http_exp)
+            return False
 
-        self.broker.online.connect()
+        try:
+            self.broker.online.connect()
+        except SessionException as session_exp:
+            print(session_exp)
+            return False
+        
+        return True
+
 
     def end_session(self):
         """ close connection """
-        self.broker.online.disconnect()
+        try:
+            return self.broker.online.disconnect()
+        except SessionException as session_exp:
+            print(session_exp)
+            return False
+
+        return True
 
     def get_data_from_ticker(self, ticker, n_days):
         """ retrieve data from the ticker """

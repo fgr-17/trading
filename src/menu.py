@@ -18,7 +18,7 @@ def option2():
 def option3():
      print('Handle option \'Option 3\'')
 
-if __name__=='__main__':
+def menu():
     while(True):
         print_menu()
         option = ''
