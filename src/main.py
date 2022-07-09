@@ -1,12 +1,11 @@
 #!/opt/venv/bin/python
 """Main routine"""
 import broker as brk
-import menu
+# import menu
 
 COCOSAPP_BROKER_ID = 265
 cocos_brk = brk.Broker(COCOSAPP_BROKER_ID)
 
-# todo: pasar a una db
 tickers = [
     "ALUA", "BBAR", "BMA", "BYMA", "CEPU", "COME", "CRES", "CVH", "EDN",
     "GGAL", "HARG", "LOMA", "MIRG", "PAMP", "SUPV", "TECO2", "TGNO4", "TGSU2",
