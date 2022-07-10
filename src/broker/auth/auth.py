@@ -38,10 +38,10 @@ class Auth:
 
     def print(self):
         """ show auth info """
-        print(f'DNI:{self.dni}')
-        print(f'usuario:{self.usr}')
-        print(f'password:{self.pwd}')
-        print(f'cuenta:{self.acc}')
+        print(f'DNI: {self.dni}')
+        print(f'usuario: {self.usr}')
+        print(f'password: {self.pwd}')
+        print(f'cuenta: {self.acc}')
 
     def save_file(self):
         """ save file with auth info """
