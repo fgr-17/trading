@@ -13,6 +13,7 @@ class TestAuth(unittest.TestCase):
     #     auth.input = input
 
     def test_constructor(self):
+
         with patch.object(auth.Auth, 'read_file') as mock_read_file:
             mock_read_file.return_value = 0
 
@@ -21,6 +22,15 @@ class TestAuth(unittest.TestCase):
             assert test_obj.bin_path == "../bin"
             assert test_obj.auth_file == "../bin/Authfile"
             self.assertTrue(mock_read_file.called)
+
+        with patch.object(auth.Auth, 'read_file') as mock_read_file:
+
+            with patch.object(auth.Auth, 'input_account_data') as mock_input_account_data:
+                mock_read_file.return_value = 1
+                test_obj_2 = auth.Auth()
+                self.assertTrue(mock_read_file.called)
+                self.assertTrue(mock_input_account_data.called)
+
 
 
 
