@@ -1,106 +1,37 @@
 # -*- coding: utf-8 -*-
 
-"""
-    Basic access and management for pyhomebroker APIs
-"""
+""" Basic access and management for pyhomebroker APIs """
 
-__all__ = ['HbAuth', 'HbInterface', 'Broker']
+__all__ = ['HbInterface', 'Broker']
 __version__ = '0.0.1'
 __author__ = 'fgr-17'
 
-import os
 import datetime
 
-from pyhomebroker import HomeBroker
+from pyhomebroker.common.exceptions import SessionException
+import pyhomebroker as phb
 
 import pandas as pd
 import requests
 
-
-class HbAuth:
-    """
-        pyhomebroker auth data
-    """
-
-    BIN_PATH = "../bin"
-
-    try:
-        os.mkdir(BIN_PATH)
-    except OSError as error:
-        # print(error)
-        pass
-
-    auth_file = f'{BIN_PATH}/Authfile'
-
-    def __init__(self):
-        if self.read_file() is not None:
-            self.input_account_data()
-
-    def input_account_data(self):
-        """
-        user enters data manually
-        """
-        print("___ Ingreso cuenta ___")
-        self.dni = input("DNI:")
-        self.usr = input("User:")
-        self.pwd = input("Pass:")
-        self.acc = input("Cuenta comitente:")
-        self.save_file()
-
-    def print(self):
-        """
-        show auth info
-        """
-        print(f'DNI:{self.dni}')
-        print(f'usuario:{self.usr}')
-        print(f'password:{self.pwd}')
-        print(f'cuenta:{self.acc}')
-
-    def save_file(self):
-        """
-        save file with auth info
-        """
-        with open(self.auth_file, "w", encoding="utf8") as file_desc:
-            file_desc.write(f'{self.dni},{self.usr},{self.pwd},{self.acc}')
-            file_desc.close()
-
-    def read_file(self):
-        """
-        Read auth file
-        """
-        try:
-            with open(self.auth_file, "w", encoding="utf8") as file_desc:
-                self.dni, self.usr, self.pwd,\
-                    self.acc = file_desc.read().split(',')
-                return 0
-
-        except IOError:
-            return 2
+from . import auth
 
 
 class HbInterface:
-    """
-        pyhomebroker interface manager
-    """
+    """ pyhomebroker interface manager """
 
     def __init__(self):
-        """
-        Create the basic connection
-        """
-        self.auth = HbAuth()
+        """ Create the basic connection """
+        self.auth = auth.Auth()
 
     def print_auth_data(self):
-        """
-        print all the auth data
-        """
+        """ print all the auth data """
         self.auth.print()
 
     # traer valores de la db
     @staticmethod
     def round_price(price):
-        """
-        static method of rounding price
-        """
+        """ static method of rounding price """
         decimals = price % 1
         price_no_decimals = price//1
 
@@ -126,36 +57,43 @@ class Broker(HbInterface):
     """ general broker class """
 
     def __init__(self, code):
-        """
-        Basic constructor
-        """
+        """ Basic constructor """
         super().__init__()
         self.code = code
         self.broker = None
 
     def start_session(self):
-        """
-        Init broker session
-        """
-        self.broker = HomeBroker(self.code)
+        """ Init broker session """
+        self.broker = phb.HomeBroker(self.code)
 
         try:
             self.broker.auth.login(self.auth.dni, self.auth.usr, self.auth.pwd, raise_exception=True)
-        except:
-            print('Auth data failed')
+        except SessionException as session_exp:
+            print(session_exp)
+            return False
+        except requests.exceptions.HTTPError as http_exp:
+            print(http_exp)
+            return False
 
-        self.broker.online.connect()
+        try:
+            self.broker.online.connect()
+        except SessionException as session_exp:
+            print(session_exp)
+            return False
+        return True
 
     def end_session(self):
-        """
-        close connection
-        """
-        self.broker.online.disconnect()
+        """ close connection """
+        try:
+            return self.broker.online.disconnect()
+        except SessionException as session_exp:
+            print(session_exp)
+            return False
+
+        return True
 
     def get_data_from_ticker(self, ticker, n_days):
-        """
-        retrieve data from the ticker
-        """
+        """ retrieve data from the ticker """
         data = self.broker.history.get_daily_history(ticker,
                                                      datetime.date.today() - datetime.timedelta(days=n_days),
                                                      datetime.date.today())
@@ -165,9 +103,7 @@ class Broker(HbInterface):
         return data
 
     def get_dataset(self, tickers, n_days):
-        """
-        get the entire dataset
-        """
+        """ get the entire dataset """
         df_ = []
         for ticker in tickers:
             ticker_data = self.get_data_from_ticker(ticker, n_days)
@@ -178,16 +114,12 @@ class Broker(HbInterface):
         return pd.concat(df_, 1)
 
     def get_current_price(self, ticker):
-        """
-        get current price of specific
-        """
+        """ get current price of specific """
         return self.broker.history.get_intraday_history(
             ticker).tail(1).close.values[0]
 
     def get_current_portfolio(self):
-        """
-        retrieve the whole portfolio
-        """
+        """ retrieve the whole portfolio """
         payload = {'comitente': str(self.auth.acc),
                    'consolida': '0',
                    'proceso': '22',
@@ -231,9 +163,7 @@ class Broker(HbInterface):
 
     @staticmethod
     def changes2orders(changes, plazo):
-        """
-        Create orders from change list
-        """
+        """ Create orders from change list """
         orders = []
         for ticker, price_quantity in changes.items():
             price, quantity = price_quantity
@@ -251,9 +181,7 @@ class Broker(HbInterface):
     #     return orders
 
     def execute_orders(self, orders):
-        """
-        run all the orders
-        """
+        """ run all the orders """
         for order in orders:
             if order[0] == "V":
                 order_number = self.broker.orders.\
@@ -266,15 +194,11 @@ class Broker(HbInterface):
         return order_number
 
     def sell_order(self, symbol, settlement, price, size):
-        """
-        Sell an specific order
-        """
+        """ Sell an specific order """
         o_no = self.broker.orders.send_sell_order(symbol, settlement, price, size)
         return o_no
 
     def buy_order(self, symbol, settlement, price, size):
-        """
-        Buy an specific order
-        """
+        """ Buy an specific order """
         o_no = self.broker.orders.send_buy_order(symbol, settlement, price, size)
         return o_no
