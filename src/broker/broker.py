@@ -67,7 +67,7 @@ class Broker(HbInterface):
         self.broker = phb.HomeBroker(self.code)
 
         try:
-            self.broker.auth.login(self.auth.dni, self.auth.usr, self.auth.pwd, raise_exception=True)
+            self.broker.auth.login(self.auth.id_num, self.auth.usr, self.auth.pwd, raise_exception=True)
         except SessionException as session_exp:
             print(session_exp)
             return False

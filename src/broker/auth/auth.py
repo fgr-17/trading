@@ -6,25 +6,36 @@ __all__ = ['Auth']
 __version__ = '0.0.1'
 __author__ = 'fgr-17'
 
-
 import os
-
+from operator import itemgetter
 
 class Auth:
     """ pyhomebroker auth data """
 
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, id_num, usr, pwd, acc):
+        self.id_num = id_num
+        self.usr = usr
+        self.pwd = pwd
+        self.acc = acc
+
+        self.print()
+
 
     @classmethod
     def from_file(cls, filename):
-        cls.auth_file = filename
-        if cls.read_file() != 0:
-            cls.input_account_data()
+        """ Creates auth data from file """
+        print(os.getcwd())
+        print(filename)
+        ret = cls.read_file(filename) 
 
-        # @classmethod
-        # def from_dict(cls)
+        print(ret)
+        if(isinstance(ret, dict)):
+            return(cls(ret['id_num'], ret['usr'], ret['pwd'], ret['acc']))
+        else:
+            return None
 
+
+        # cls.input_account_data(cls)
 
 # self.bin_path = "../bin"
 #         self.auth_file = f'{self.bin_path}/Authfile'
@@ -35,45 +46,38 @@ class Auth:
         #     # print(error)
         #     pass
 
-        
-
-    # def __init__(self, dni, user, password, comitente):
-
-    #     self.dni = dni
-    #     self.usr = user
-    #     self.pwd = password
-    #     self.acc = comitente
-    #     self.save_file()
-
     def input_account_data(self):
         """ user enters data manually """
         print("___ Ingreso cuenta ___")
-        self.dni = input("DNI:")
+        self.id_num = input("ID:")
         self.usr = input("User:")
         self.pwd = input("Pass:")
-        self.acc = input("Cuenta comitente:")
+        self.acc = input("Account:")
         self.save_file()
 
     def print(self):
         """ show auth info """
-        print(f'DNI: {self.dni}')
-        print(f'usuario: {self.usr}')
+        print(f'ID: {self.id_num}')
+        print(f'user: {self.usr}')
         print(f'password: {self.pwd}')
-        print(f'cuenta: {self.acc}')
+        print(f'account: {self.acc}')
 
-    def save_file(self):
+    @staticmethod
+    def save_file(auth_data, filename):
         """ save file with auth info """
-        with open(self.auth_file, "w", encoding="utf8") as file_desc:
-            file_desc.write(f'{self.dni},{self.usr},{self.pwd},{self.acc}')
+        with open(filename, "w", encoding="utf8") as file_desc:
+            file_desc.write(f'{auth_data.id_num},{auth_data.usr},{auth_data.pwd},{auth_data.acc}')
             file_desc.close()
 
-    def read_file(self):
+    @staticmethod
+    def read_file(filename):
+        print(f'filename: {filename}')
         """ Read auth file """
         try:
-            with open(self.auth_file, "r", encoding="utf8") as file_desc:
-                self.dni, self.usr, self.pwd,\
-                    self.acc = file_desc.read().split(',')
-                return 0
+            with open(filename, "r", encoding="utf8") as file_desc:
+                keys = ["id_num", "usr", "pwd", "acc"]
+                values = file_desc.read().split(',')
+                return dict(zip(keys, values))
 
         except IOError:
             return 2

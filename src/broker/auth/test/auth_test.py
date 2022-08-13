@@ -2,43 +2,42 @@ import pytest
 import unittest
 from mock import patch
 
-from broker import auth
+from broker.auth import Auth
 import broker
 
 
 class TestAuth(unittest.TestCase):
 
-    # def setUp(self) -> None:
+    def setUp(self) -> None:
+        pass
 
-    # def tearDown(self) -> None:
-    #     auth.input = input
+    def tearDown(self) -> None:
+        pass
 
-    def test_constructor_auto(self):
+    def test_constructor_failed(self):
 
-        with patch.object(auth.Auth, 'read_file') as mock_read_file:
+        with patch.object(Auth, 'read_file') as mock_read_file:
             mock_read_file.return_value = 0
 
-            test_obj = auth.Auth.from_file("/bin/Authfile")
+            test_obj = Auth.from_file("...")
+            assert test_obj == None
             # with pytest.raises(Exception) as e_info:
             # assert test_obj.bin_path == "../bin"
-            assert test_obj.auth_file == "../bin/Authfile"
-            self.assertTrue(mock_read_file.called)
+            # assert test_obj.auth_file == "bin/Authfile"
+            # self.assertTrue(mock_read_file.called)
+    
+    def test_constructor_ok(self):
+        test_obj = Auth.from_file("bin/Authfile")
+        assert test_obj != None
 
-        with patch.object(auth.Auth, 'read_file') as mock_read_file:
 
-            with patch.object(auth.Auth, 'input_account_data') as mock_input_account_data:
-                mock_read_file.return_value = 1
-                test_obj_2 = auth.Auth()
-                self.assertTrue(mock_read_file.called)
-                self.assertTrue(mock_input_account_data.called)
-
-    def test_input_account_data(self):
-        auth.input = lambda: '11223344'
+    # def test_input_account_data(self):
+    #     # input = lambda: '11223344'
 
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(TestAuth('test_constructor_auto'))
+    suite.addTest(TestAuth('test_constructor_failed'))
     suite.addTest(TestAuth('test_input_account_data'))
     return suite
 
