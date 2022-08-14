@@ -48,7 +48,7 @@ function lint() {
 
 function test() {
     printf "\n${bold}Running unit tests ...${normal}\n"
-    pytest "${SOURCE_PATH}"
+    pytest -s "${SOURCE_PATH}"
     return $?
 }
 

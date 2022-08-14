@@ -20,16 +20,15 @@ class TestAuth(unittest.TestCase):
             mock_read_file.return_value = 0
 
             test_obj = Auth.from_file("...")
-            assert test_obj == None
+            assert test_obj is None
             # with pytest.raises(Exception) as e_info:
             # assert test_obj.bin_path == "../bin"
             # assert test_obj.auth_file == "bin/Authfile"
             # self.assertTrue(mock_read_file.called)
-    
-    def test_constructor_ok(self):
-        test_obj = Auth.from_file("bin/Authfile")
-        assert test_obj != None
 
+    def test_constructor_ok(self):
+        test_obj = Auth.from_file("../bin/Authfile")
+        assert test_obj is not None
 
     # def test_input_account_data(self):
     #     # input = lambda: '11223344'

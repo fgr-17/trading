@@ -22,7 +22,9 @@ class HbInterface:
 
     def __init__(self):
         """ Create the basic connection """
-        self.auth = auth.Auth()
+        self.auth = auth.Auth.from_file("../bin/Authfile")
+        if self.auth is None:
+            self.auth = auth.Auth.from_stdin()
 
     def print_auth_data(self):
         """ print all the auth data """
@@ -67,7 +69,7 @@ class Broker(HbInterface):
         self.broker = phb.HomeBroker(self.code)
 
         try:
-            self.broker.auth.login(self.auth.id_num, self.auth.usr, self.auth.pwd, raise_exception=True)
+            self.broker.auth.login(self.auth.get_id_num(), self.auth.get_usr(), self.auth.get_pwd(), raise_exception=True)
         except SessionException as session_exp:
             print(session_exp)
             return False
@@ -120,7 +122,7 @@ class Broker(HbInterface):
 
     def get_current_portfolio(self):
         """ retrieve the whole portfolio """
-        payload = {'comitente': str(self.auth.acc),
+        payload = {'comitente': str(self.auth.get_acc()),
                    'consolida': '0',
                    'proceso': '22',
                    'fechaDesde': None,
