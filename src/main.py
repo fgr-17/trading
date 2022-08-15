@@ -1,7 +1,11 @@
 #!/opt/venv/bin/python
 """Main routine"""
 import broker as brk
+import logging
+import sys
 # import menu
+
+from datetime import datetime
 
 COCOSAPP_BROKER_ID = 265
 cocos_brk = brk.Broker(COCOSAPP_BROKER_ID)
@@ -15,8 +19,19 @@ tickers = [
 
 if __name__ == '__main__':
 
-    cocos_brk.start_session()
 
+    
+    
+    logfile= f'../bin/log{datetime.now().strftime("%d%m%Y")}'
+    logging.basicConfig(filename=logfile, level=logging.DEBUG, format="%(asctime)s %(message)s")
+
+    # logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+    
+    logging.info(f'==============================================')
+    logging.info(f'BOT-JR: Session started at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
+
+    if cocos_brk.start_session() is True:
+        logging.info('Cocos session started')
 
 # # print(cocos_brk.get_data_from_ticker("ALUA", 3))
 # print(cocos_brk.get_dataset(tickers, 5))
@@ -27,4 +42,5 @@ if __name__ == '__main__':
 
 # print(f'order {cocos_brk.buy_order("ALUA", "48hs", 98.9, 1)}')
 
-    cocos_brk.end_session()
+    if cocos_brk.end_session() is True:
+        logging.info('Cocos session finished')

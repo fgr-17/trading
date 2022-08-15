@@ -21,7 +21,7 @@ class HbInterface:
     """ pyhomebroker interface manager """
 
     def __init__(self):
-        """ Create the basic connection """
+        """ Create the basic authentication """
         self.auth = auth.Auth.from_file("../bin/Authfile")
         if self.auth is None:
             self.auth = auth.Auth.from_stdin()
@@ -30,7 +30,7 @@ class HbInterface:
         """ print all the auth data """
         self.auth.print()
 
-    # traer valores de la db
+    # candidate for db refactor (check if values are broker dependant or general)
     @staticmethod
     def round_price(price):
         """ static method of rounding price """
