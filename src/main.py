@@ -1,11 +1,11 @@
 #!/opt/venv/bin/python
 """Main routine"""
-import broker as brk
-import logging
 import sys
-# import menu
-
+import logging
 from datetime import datetime
+
+import broker as brk
+# import menu
 
 COCOSAPP_BROKER_ID = 265
 cocos_brk = brk.Broker(COCOSAPP_BROKER_ID)
@@ -19,16 +19,13 @@ tickers = [
 
 if __name__ == '__main__':
 
-
-    
-    
-    logfile= f'../bin/log{datetime.now().strftime("%d%m%Y")}'
+    logfile = f'../bin/log{datetime.now().strftime("%d%m%Y")}'
     logging.basicConfig(filename=logfile, level=logging.DEBUG, format="%(asctime)s %(message)s")
 
-    # logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-    
-    logging.info(f'==============================================')
-    logging.info(f'BOT-JR: Session started at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
+    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
+    logging.info('==============================================')
+    logging.info('BOT-JR: Session started at %s', datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
     if cocos_brk.start_session() is True:
         logging.info('Cocos session started')

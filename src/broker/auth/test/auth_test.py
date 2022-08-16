@@ -33,11 +33,37 @@ class TestAuth(unittest.TestCase):
     # def test_input_account_data(self):
     #     # input = lambda: '11223344'
 
+    def test_get(self):
+        cut = Auth(11, 22, 33, 44)
+        assert cut.get() == {'id_num': 11, 'usr': 22, 'pwd': 33, 'acc': 44}
+
+    def test_get_id_num(self):
+        cut = Auth(11, 22, 33, 44)
+        assert cut.get_id_num() is 11
+
+    def test_get_usr(self):
+        cut = Auth(11, 22, 33, 44)
+        assert cut.get_usr() is 22
+
+    def test_get_pwd(self):
+        cut = Auth(11, 22, 33, 44)
+        assert cut.get_pwd() is 33
+
+    def test_get_acc(self):
+        cut = Auth(11, 22, 33, 44)
+        assert cut.get_acc() is 44
+
+    def test_save_file(self):
+        # todo
+        assert True
+
+    def test_read_file(self):
+        # todo
+        assert True
+
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(TestAuth('test_constructor_failed'))
-    suite.addTest(TestAuth('test_input_account_data'))
     return suite
 
 
