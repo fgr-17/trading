@@ -3,7 +3,7 @@ import unittest
 from mock import patch
 
 from broker.auth import Auth
-import broker
+from broker import Broker
 
 
 class TestAuth(unittest.TestCase):
