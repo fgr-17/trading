@@ -1,4 +1,11 @@
+import broker as brk
+from tickers import Tickers
+import logging
+
 class Menu:
+
+    def __init__(self, brk):
+        self.__brk = brk
 
     menu_options = {
         1: 'Start session',
@@ -7,27 +14,34 @@ class Menu:
         4: 'Exit',
     }
 
-    @classmethod
-    def print(cls):
-        for key in cls.menu_options.keys():
-            print (key, '--', cls.menu_options[key] )
+    def print(self):
+        for key in self.menu_options.keys():
+            print (key, '--', self.menu_options[key] )
 
-    @classmethod
-    def option1(cls):
-        print('Handle option \'Option 1\'')
+    def option1(self):
 
-    @classmethod
-    def option2(cls):
-        print('Handle option \'Option 2\'')
+        if self.__brk.start_session() is True:
+            logging.info('Cocos session started')
 
-    @classmethod
-    def option3(cls):
-        print('Handle option \'Option 3\'')
+    def option2(self):
+        self.__brk.end_session()
+    
+    def option3(self):
 
-    @classmethod
-    def loop(cls):
+        Tickers.print()
+
+        ticket_no = input('Select a ticker number:')
+        ticket_str = Tickers.get_str(ticket_no)
+
+        days = int(input('Days to search back: '))
+
+        self.__brk.get_data_from_ticker(ticket_str, days)
+
+
+
+    def loop(self):
         while(True):
-            cls.print()
+            self.print()
             option = ''
             try:
                 option = int(input('Enter your choice: '))
@@ -35,11 +49,11 @@ class Menu:
                 print('Wrong input. Please enter a number ...')
             #Check what choice was entered and act accordingly
             if option == 1:
-                cls.option1()
+                self.option1()
             elif option == 2:
-                cls.option2()
+                self.option2()
             elif option == 3:
-                cls.option3()
+                self.option3()
             elif option == 4:
                 print('Exiting...')
                 exit()

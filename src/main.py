@@ -4,8 +4,8 @@ import sys
 import logging
 from datetime import datetime
 
-import broker as brk
 from menu import Menu
+import broker as brk
 from tickers import Tickers
 
 COCOSAPP_BROKER_ID = 265
@@ -19,13 +19,10 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     logging.info('==============================================')
-    logging.info('BOT-JR: Session started at %s', datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+    logging.info('BOT-JR: Program started at %s', datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-    # if cocos_brk.start_session() is True:
-    #     logging.info('Cocos session started')
-
-    Menu.loop()
-    # Tickers.print()
+    menu = Menu(cocos_brk)
+    menu.loop()
 
 # # print(cocos_brk.get_data_from_ticker("ALUA", 3))
 # print(cocos_brk.get_dataset(tickers, 5))
