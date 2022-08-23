@@ -57,7 +57,7 @@ tickers = [
 
 ## algunas funciones auxiliares: 
 
-def get_data_from_ticker(hb, ticker, n_dias):
+def ticker_get_data(hb, ticker, n_dias):
     ''' Toma una lista de tickers y un objeto homebroker y 
         busca los precios desde hoy hasta n_dias atras.
         Devuelve un dataframe con esa data. '''
@@ -74,12 +74,12 @@ def get_data_from_ticker(hb, ticker, n_dias):
 
 def get_dataset(hb, tickers, n_dias):
     ''' Toma una lista de tickers y un objeto homebroker. Para cada ticker llama
-        a la funcion get_data_from_tickers y se queda con el precio de cierre.
+        a la funcion ticker_get_datas y se queda con el precio de cierre.
         Concatena todas las Series en un dataframe y lo devuelve. '''
     
     df = []
     for t in tickers:
-        ticker_data = get_data_from_ticker(hb, t, n_dias)
+        ticker_data = ticker_get_data(hb, t, n_dias)
         ticker_data = ticker_data.close
         ticker_data.name = t
         df.append(ticker_data)
@@ -87,7 +87,7 @@ def get_dataset(hb, tickers, n_dias):
     return pd.concat(df,1)
 
 
-def get_current_price(hb, ticker):
+def ticker_get_current_price(hb, ticker):
     ''' Devuelve el precio actual de un ticker '''
     return hb.history.get_intraday_history(ticker).tail(1).close.values[0]
 
@@ -140,7 +140,7 @@ def get_1overN_portfolio(hb, tickers, capital):
     money_per_asset = capital/len(tickers)
     portfolio = []
     for t in tickers:
-        current_price = get_current_price(hb, t)
+        current_price = ticker_get_current_price(hb, t)
         current_price = round_price(current_price)
         n_assets = money_per_asset//current_price
         portfolio.append((t, current_price, n_assets))

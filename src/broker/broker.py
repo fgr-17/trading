@@ -94,32 +94,6 @@ class Broker(HbInterface):
 
         return True
 
-    def get_data_from_ticker(self, ticker, n_days):
-        """ retrieve data from the ticker """
-        data = self.broker.history.get_daily_history(ticker,
-                                                     datetime.date.today() - datetime.timedelta(days=n_days),
-                                                     datetime.date.today())
-
-        data.loc[:, "date"] = pd.to_datetime(data.loc[:, "date"])
-        data = data.set_index("date")
-        return data
-
-    def get_dataset(self, tickers, n_days):
-        """ get the entire dataset """
-        df_ = []
-        for ticker in tickers:
-            ticker_data = self.get_data_from_ticker(ticker, n_days)
-            ticker_data = ticker_data.close
-            ticker_data.name = ticker
-            df_.append(ticker_data)
-
-        return pd.concat(df_, 1)
-
-    def get_current_price(self, ticker):
-        """ get current price of specific """
-        return self.broker.history.get_intraday_history(
-            ticker).tail(1).close.values[0]
-
     def get_current_portfolio(self):
         """ retrieve the whole portfolio """
         payload = {'comitente': str(self.auth.get_acc()),
@@ -141,6 +115,46 @@ class Broker(HbInterface):
         # portfolio = [( x["NERE"], float(x["PCIO"]),
         # float(x["CANT"]) ) for x in portfolio]
         return portfolio
+
+    def ticker_get_data(self, ticker, n_days):
+        """ retrieve data from the ticker """
+        data = self.broker.history.get_daily_history(ticker,
+                                                     datetime.date.today() - datetime.timedelta(days=n_days),
+                                                     datetime.date.today())
+
+        # data.loc[:, "date"] = pd.to_datetime(data.loc[:, "date"])
+        # data = data.set_index("date")
+        return data
+
+    def ticker_get_current_price(self, ticker):
+        """ get current price of specific ticker [ONLINE]"""
+        # return self.broker.history.get_intraday_history(
+        #     ticker).tail(1).close.values[0]
+        return self.broker.history.get_intraday_history(ticker)
+
+    def ticker_get_current_position(self, ticker):
+        ''' get current position of a ticker '''
+        portfolio = self.get_current_portfolio()
+        positions_array = portfolio["Result"]["Activos"][1]["Subtotal"]
+
+        # portfolio = [( x["NERE"], float(x["PCIO"]), float(x["CANT"]) ) for x in portfolio]
+
+        ticker_complete = next(item for item in positions_array if item["NERE"] == ticker)
+        keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
+        ticker_ret = {x: ticker_complete[x] for x in keys_to_retrieve}
+
+        return ticker_ret
+
+    def get_dataset(self, tickers, n_days):
+        """ get the entire dataset """
+        df_ = []
+        for ticker in tickers:
+            ticker_data = self.ticker_get_data(ticker, n_days)
+            ticker_data = ticker_data.close
+            ticker_data.name = ticker
+            df_.append(ticker_data)
+
+        return pd.concat(df_, 1)
 
     # @staticmethod
     # def get_changes(old_portfolio, new_portfolio):

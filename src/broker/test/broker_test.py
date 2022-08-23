@@ -32,13 +32,13 @@ class TestBroker(unittest.TestCase):
     def test_end_session(self):
         assert True
 
-    def test_get_data_from_ticker(self):
+    def test_ticker_get_data(self):
         assert True
 
     def test_get_dataset(self):
         assert True
 
-    def test_get_current_price(self):
+    def test_ticker_get_current_price(self):
         assert True
 
     def test_get_current_portfolio(self):
