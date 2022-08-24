@@ -76,7 +76,7 @@ class Menu:
     def option6(self):
         ''' set new positions '''
         pf = self.__brk.portfolio_get()
-        print(self.__brk.portfolio_set_new_positions())
+        print(self.__brk.portfolio_set_new_positions(pf))
 
     def loop(self):
         while(True):
