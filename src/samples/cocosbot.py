@@ -153,13 +153,13 @@ portfolio = get_1overN_portfolio(hb, portfolio_tickers, capital)
 ## una lista de tuplas. En cada tupla: ticker, precio y cantidad
 portfolio
 
-"""Iteramos sobre cada tupla del portfolio y llamamos al método "send_buy_orders" para hacer las compras:"""
+"""Iteramos sobre cada tupla del portfolio y llamamos al método "send_order_buys" para hacer las compras:"""
 
 ## y con esto lo compramos
 for p in portfolio:
     ## si la cantidad es mayor a 0, compramos:
     if p[2] > 0: 
-        order_number = hb.orders.send_buy_order(p[0], plazo, p[1], int(p[2]))
+        order_number = hb.orders.send_order_buy(p[0], plazo, p[1], int(p[2]))
 
 """Con esto ya tenemos un primer portfolio andando!
 
@@ -171,7 +171,7 @@ La idea seria meter este pedacito de codigo en un cron y olvidarte.
 Vamos por partes: lo primero es traerme el portfolio actual:
 """
 
-def get_current_portfolio(hb, comitente):
+def portfolio_get_current_positions(hb, comitente):
     
     '''Esta funcion hace un request contra /Consultas/GetConsultas al proceso 22. Esto te devuelve tu comitente'''
     
@@ -252,12 +252,12 @@ def execute_orders(hb, orders):
     
     for order in orders:
         if order[0] == "V":
-            order_number = hb.orders.send_sell_order(order[1], order[2], order[3], int(abs(order[4])))
+            order_number = hb.orders.send_order_sell(order[1], order[2], order[3], int(abs(order[4])))
         elif order[0] == "C":
-            order_number = hb.orders.send_buy_order(order[1], order[2], order[3], int(abs(order[4])))
+            order_number = hb.orders.send_order_buy(order[1], order[2], order[3], int(abs(order[4])))
 
 ## obtenemos el portfolio actual
-current = get_current_portfolio(hb, comitente)
+current = portfolio_get_current_positions(hb, comitente)
 
 ## y esto es nuestro capital: ¿cuanto vale nuestro portfolio?
 ## esa plata la vamos a dividir para rebalacearlo

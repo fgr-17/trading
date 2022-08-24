@@ -28,9 +28,9 @@ if __name__ == '__main__':
 
 # print(f'current price ALUA: {cocos_brk.ticker_get_current_price(tickers[0])}')
 
-# print(cocos_brk.get_current_portfolio())
+# print(cocos_brk.portfolio_get_current_positions())
 
-# print(f'order {cocos_brk.buy_order("ALUA", "48hs", 98.9, 1)}')
+# print(f'order {cocos_brk.order_buy("ALUA", "48hs", 98.9, 1)}')
 
     # if cocos_brk.end_session() is True:
     #     logging.info('Cocos session finished')

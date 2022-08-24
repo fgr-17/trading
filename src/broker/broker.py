@@ -94,7 +94,7 @@ class Broker(HbInterface):
 
         return True
 
-    def get_current_portfolio(self):
+    def portfolio_get(self):
         """ retrieve the whole portfolio """
         payload = {'comitente': str(self.auth.get_acc()),
                    'consolida': '0',
@@ -108,20 +108,29 @@ class Broker(HbInterface):
         portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta",
                                   cookies=self.broker.auth.cookies,
                                   json=payload).json()
-
-        # portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
-
-        # ## esto devuelve el ticker, el precio y la cantidad que tenes
-        # portfolio = [( x["NERE"], float(x["PCIO"]),
-        # float(x["CANT"]) ) for x in portfolio]
         return portfolio
+
+
+    def portfolio_get_current_positions(self, portfolio):
+        portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
+        keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
+        portfolio = [{x: ticker[x] for x in keys_to_retrieve} for ticker in portfolio]
+        return portfolio
+
+    def portfolio_set_new_positions(self, portfolio):
+        print("Current portfolio ...")
+        print(portfolio)
+
+    def portfolio_get_curr_account_subtotal(self, portfolio):
+        portfolio = portfolio["Result"]["Activos"][0]["Subtotal"]
+        subtotal = portfolio[0]["IMPO"]
+        return subtotal
 
     def ticker_get_data(self, ticker, n_days):
         """ retrieve data from the ticker """
         data = self.broker.history.get_daily_history(ticker,
                                                      datetime.date.today() - datetime.timedelta(days=n_days),
                                                      datetime.date.today())
-
         # data.loc[:, "date"] = pd.to_datetime(data.loc[:, "date"])
         # data = data.set_index("date")
         return data
@@ -134,27 +143,29 @@ class Broker(HbInterface):
 
     def ticker_get_current_position(self, ticker):
         ''' get current position of a ticker '''
-        portfolio = self.get_current_portfolio()
+        portfolio = self.portfolio_get()
         positions_array = portfolio["Result"]["Activos"][1]["Subtotal"]
 
-        # portfolio = [( x["NERE"], float(x["PCIO"]), float(x["CANT"]) ) for x in portfolio]
+        ticker_complete = next((item for item in positions_array if item["NERE"] == ticker), None)
 
-        ticker_complete = next(item for item in positions_array if item["NERE"] == ticker)
-        keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
-        ticker_ret = {x: ticker_complete[x] for x in keys_to_retrieve}
+        if ticker_complete is not None:
+            keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
+            ticker_ret = {x: ticker_complete[x] for x in keys_to_retrieve}
+            return ticker_ret
+        else:
+            return None
 
-        return ticker_ret
+    # todo: move one layer up
+    # def get_dataset(self, tickers, n_days):
+    #     """ get the entire dataset """
+    #     df_ = []
+    #     for ticker in tickers:
+    #         ticker_data = self.ticker_get_data(ticker, n_days)
+    #         ticker_data = ticker_data.close
+    #         ticker_data.name = ticker
+    #         df_.append(ticker_data)
 
-    def get_dataset(self, tickers, n_days):
-        """ get the entire dataset """
-        df_ = []
-        for ticker in tickers:
-            ticker_data = self.ticker_get_data(ticker, n_days)
-            ticker_data = ticker_data.close
-            ticker_data.name = ticker
-            df_.append(ticker_data)
-
-        return pd.concat(df_, 1)
+    #     return pd.concat(df_, 1)
 
     # @staticmethod
     # def get_changes(old_portfolio, new_portfolio):
@@ -178,22 +189,22 @@ class Broker(HbInterface):
     #     return changes
 
     @staticmethod
-    def changes2orders(changes, plazo):
+    def changes2orders(changes, settlement):
         """ Create orders from change list """
         orders = []
         for ticker, price_quantity in changes.items():
             price, quantity = price_quantity
             if quantity < 0:
-                order = ("V", ticker, plazo, price, quantity)
+                order = ("V", ticker, settlement, price, quantity)
                 orders.append(order)
         return orders
 
-    # def get_orders(self, old_portfolio, new_portfolio, plazo):
+    # def get_orders(self, old_portfolio, new_portfolio, settlement):
     #     """
     #     get the orders needed to buy
     #     """
     #     changes = self.get_changes(old_portfolio, new_portfolio)
-    #     orders = self.changes2orders(changes, plazo)
+    #     orders = self.changes2orders(changes, settlement)
     #     return orders
 
     def execute_orders(self, orders):
@@ -209,12 +220,12 @@ class Broker(HbInterface):
                                               order[3], int(abs(order[4])))
         return order_number
 
-    def sell_order(self, symbol, settlement, price, size):
+    def order_sell(self, symbol, settlement, price, size):
         """ Sell an specific order """
         o_no = self.broker.orders.send_sell_order(symbol, settlement, price, size)
         return o_no
 
-    def buy_order(self, symbol, settlement, price, size):
+    def order_buy(self, symbol, settlement, price, size):
         """ Buy an specific order """
         o_no = self.broker.orders.send_buy_order(symbol, settlement, price, size)
         return o_no

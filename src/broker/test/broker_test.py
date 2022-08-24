@@ -41,7 +41,7 @@ class TestBroker(unittest.TestCase):
     def test_ticker_get_current_price(self):
         assert True
 
-    def test_get_current_portfolio(self):
+    def test_portfolio_get_current_positions(self):
         assert True
 
     def test_changes2orders(self):
