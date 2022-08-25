@@ -10,8 +10,6 @@ import datetime
 
 from pyhomebroker.common.exceptions import SessionException
 import pyhomebroker as phb
-
-import pandas as pd
 import requests
 
 from . import auth
@@ -110,18 +108,20 @@ class Broker(HbInterface):
                                   json=payload).json()
         return portfolio
 
-
     def portfolio_get_current_positions(self, portfolio):
+        ''' list all tickers '''
         portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
         keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
         portfolio = [{x: ticker[x] for x in keys_to_retrieve} for ticker in portfolio]
         return portfolio
 
     def portfolio_set_new_positions(self, portfolio):
+        ''' todo: orders in batch mode - CISC not wanted '''
         print("Current portfolio ...")
         print(portfolio)
 
     def portfolio_get_curr_account_subtotal(self, portfolio):
+        ''' get current cash '''
         portfolio = portfolio["Result"]["Activos"][0]["Subtotal"]
         subtotal = portfolio[0]["IMPO"]
         return subtotal
@@ -152,10 +152,10 @@ class Broker(HbInterface):
             keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
             ticker_ret = {x: ticker_complete[x] for x in keys_to_retrieve}
             return ticker_ret
-        else:
-            return None
 
-    # todo: move one layer up
+        return None
+
+    # move one layer up
     # def get_dataset(self, tickers, n_days):
     #     """ get the entire dataset """
     #     df_ = []
@@ -221,11 +221,11 @@ class Broker(HbInterface):
         return order_number
 
     def order_sell(self, symbol, settlement, price, size):
-        """ Sell an specific order """
+        """ Sell an specific order wrapper """
         o_no = self.broker.orders.send_sell_order(symbol, settlement, price, size)
         return o_no
 
     def order_buy(self, symbol, settlement, price, size):
-        """ Buy an specific order """
+        """ Buy an specific order wrapper """
         o_no = self.broker.orders.send_buy_order(symbol, settlement, price, size)
         return o_no

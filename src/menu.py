@@ -17,8 +17,9 @@ class Menu:
         3: 'Get data from ticker',
         4: 'Get current portfolio',
         5: 'Get account subtotal',
-        6: 'Set new portfolio',
-        7: 'Exit',
+        6: 'Buy order',
+        7: 'Sell order',
+        8: 'Exit',
     }
 
     def print(self):
@@ -74,9 +75,43 @@ class Menu:
         print(json_data)
 
     def option6(self):
-        ''' set new positions '''
-        pf = self.__brk.portfolio_get()
-        print(self.__brk.portfolio_set_new_positions(pf))
+        ''' buy order '''
+        Tickers.print()
+
+        ticker_no = input('Select a ticker number:')
+        ticker_str = Tickers.get_str(ticker_no)
+
+        print('\n===== Ticker current price =====')
+        print(self.__brk.ticker_get_current_price(ticker_str))
+
+        price = input("Enter buying price:")
+        quant = input("Enter quantity:")
+        print(self.__brk.order_buy(ticker_str, "48hs", float(price), int(float(quant))))
+
+    def option7(self):
+        ''' sell order '''
+        Tickers.print()
+
+        ticker_no = input('Select a ticker number:')
+        ticker_str = Tickers.get_str(ticker_no)
+
+        print('\n===== Ticker current price =====')
+        print(self.__brk.ticker_get_current_price(ticker_str))
+
+        print('\n===== Ticker current position =====')
+        current_pos = self.__brk.ticker_get_current_position(ticker_str)
+
+        if current_pos is not None:
+            print(current_pos)
+
+            price = input("Enter selling price:")
+            quant = input("Enter quantity:")
+            print(self.__brk.order_sell(ticker_str, "48hs", float(price), int(float(quant))))
+
+
+        else:
+            print('Ticker position not found')
+
 
     def loop(self):
         while(True):
@@ -100,6 +135,8 @@ class Menu:
             elif option == 6:
                 self.option6()
             elif option == 7:
+                self.option7()
+            elif option == 8:
                 print('Exiting...')
                 os._exit(1)
             else:
