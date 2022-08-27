@@ -2,6 +2,9 @@
 
 MAX_LINE_LENGTH=200
 SOURCE_PATH='../src'
+CURRENT_DIR=$(pwd)
+
+BROKER_PATH="${SOURCE_PATH}/broker"
 
 bold=$(tput bold)
 normal=$(tput sgr0)
@@ -12,6 +15,17 @@ packages=(
     "broker/auth"
 )
 
+function check_base_dir() {
+
+    SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+    if [ $CURRENT_DIR != $SCRIPT_DIR ]; then
+        printf "Error: run this script from its folder, please\n"
+        exit 1
+    fi
+
+    return 0
+}
 
 function style() {
     printf "\n${bold}Checking code style ...${normal}\n"
@@ -54,6 +68,8 @@ function test() {
 
 MAIN_FILE="${SOURCE_PATH}/main.py"
 
+check_base_dir
+
 style
 if [ $? -ne 0 ]; then
     printf "Please check code style before continue...\n"
@@ -71,5 +87,16 @@ if [ $? -ne 0 ]; then
     printf "Please test cases before continue...\n"
     exit 1
 fi
+
+
+printf "Building Broker Package"
+cd $CURRENT_DIR
+cd $BROKER_PATH
+python3 -m build
+if [ $? -ne 0 ]; then
+    printf "Couldn't build broker package, exiting...\n"
+    exit 1
+fi
+
 
 ${MAIN_FILE}
