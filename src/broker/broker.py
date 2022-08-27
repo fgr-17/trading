@@ -12,8 +12,7 @@ from pyhomebroker.common.exceptions import SessionException
 import pyhomebroker as phb
 import requests
 
-from . import auth
-
+from broker.auth import Auth
 
 class HbInterface:
     """ pyhomebroker interface manager """

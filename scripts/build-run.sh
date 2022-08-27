@@ -10,7 +10,7 @@ bold=$(tput bold)
 normal=$(tput sgr0)
 
 packages=(
-    "main.py"
+    "menu-app/main.py"
     "broker"
     "broker/auth"
 )

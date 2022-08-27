@@ -166,6 +166,8 @@ class Menu:
                 os._exit(1)
             else:
                 print('Invalid option. Please enter a number between 1 and 4.')
+
+
 '''
 
 
