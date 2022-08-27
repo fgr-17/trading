@@ -36,7 +36,8 @@ class Menu:
 
     def option2(self):
         ''' end broker session '''
-        self.__brk.end_session()
+        if self.__brk.end_session() is True:
+            logging.info('Cocos session ended')
     
     def option3(self):
         ''' select a ticker and print info '''
@@ -57,8 +58,9 @@ class Menu:
         current_pos = self.__brk.ticker_get_current_position(ticker_str)
         if current_pos is not None:
             print(current_pos)
+            logging.info(f'Getting info from {ticker_str}, {days} days ago')
         else:
-            print('Ticker position not found')
+            logging.info('Ticker position not found')
 
     def option4(self):
         ''' print all portfolio '''
@@ -66,6 +68,7 @@ class Menu:
         data = self.__brk.portfolio_get_current_positions(pf)
         json_data = json.dumps(data, indent=2)
         print(json_data)
+        logging.info('Getting complete portfolio')
 
     def option5(self):
         ''' get current account subtotal '''
@@ -73,6 +76,7 @@ class Menu:
         data = self.__brk.portfolio_get_curr_account_subtotal(pf)
         json_data = json.dumps(data, indent=2)
         print(json_data)
+        logging.info('Getting account subtotal')
 
     def option6(self):
         ''' buy order '''
@@ -87,6 +91,7 @@ class Menu:
         price = input("Enter buying price:")
         quant = input("Enter quantity:")
         print(self.__brk.order_buy(ticker_str, "48hs", float(price), int(float(quant))))
+        logging.info("attempted to buy {ticket_str} price: {price} size: {quant}")
 
     def option7(self):
         ''' sell order '''
@@ -107,7 +112,7 @@ class Menu:
             price = input("Enter selling price:")
             quant = input("Enter quantity:")
             print(self.__brk.order_sell(ticker_str, "48hs", float(price), int(float(quant))))
-
+            logging.info("attempted to sell {ticket_str} price: {price} size: {quant}")
 
         else:
             print('Ticker position not found')
