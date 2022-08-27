@@ -113,7 +113,6 @@ class Menu:
             quant = input("Enter quantity:")
             print(self.__brk.order_sell(ticker_str, "48hs", float(price), int(float(quant))))
             logging.info("attempted to sell {ticket_str} price: {price} size: {quant}")
-
         else:
             print('Ticker position not found')
 
