@@ -37,7 +37,7 @@ hb.online.connect()
 
 """Codigo auxiliar para bajar data y para redondear precios:"""
 
-def get_data_from_ticker(hb, ticker, date_from, date_to):
+def ticker_get_data(hb, ticker, date_from, date_to):
     ''' Toma una lista de tickers y un objeto homebroker y 
         busca los precios desde date_from hasta date_to.
         Devuelve un dataframe con esa data. '''
@@ -53,12 +53,12 @@ def get_data_from_ticker(hb, ticker, date_from, date_to):
 
 def get_dataset(hb, tickers, date_from, date_to):
     ''' Toma una lista de tickers y un objeto homebroker. Para cada ticker llama
-        a la funcion get_data_from_tickers y se queda con el precio de cierre.
+        a la funcion ticker_get_datas y se queda con el precio de cierre.
         Concatena todas las Series en un dataframe y lo devuelve. '''
     
     df = []
     for t in tickers:
-        ticker_data = get_data_from_ticker(hb, t, date_from, date_to)
+        ticker_data = ticker_get_data(hb, t, date_from, date_to)
         ticker_data = ticker_data.close
         ticker_data.name = t
         df.append(ticker_data)
