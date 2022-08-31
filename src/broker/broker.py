@@ -2,17 +2,13 @@
 
 """ Basic access and management for pyhomebroker APIs """
 
-__all__ = ['HbInterface', 'Broker']
-__version__ = '0.0.1'
-__author__ = 'fgr-17'
-
 import datetime
 
 from pyhomebroker.common.exceptions import SessionException
 import pyhomebroker as phb
 import requests
 
-from broker.auth import Auth
+from .auth import Auth
 
 class HbInterface:
     """ pyhomebroker interface manager """
