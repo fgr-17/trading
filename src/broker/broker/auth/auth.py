@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Basic access and management for pyhomebroker APIs """
 
-__all__ = ['Auth']
 __version__ = '0.0.1'
 __author__ = 'fgr-17'
 
