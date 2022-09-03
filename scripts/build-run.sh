@@ -11,8 +11,8 @@ normal=$(tput sgr0)
 
 packages=(
     "menu-app/main.py"
-    "broker"
-    "broker/auth"
+    "broker/broker"
+    "broker/broker/auth"
 )
 
 function check_base_dir() {
@@ -33,7 +33,7 @@ function style() {
 
     for package in ${packages[@]}; do
         printf "\t> Checking $package..."
-        pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH "${SOURCE_PATH}/$package"
+        pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH "${SOURCE_PATH}/$package" --exclude='*build*'
 
         if [ $? -ne 0 ]; then
             return 1
@@ -66,7 +66,9 @@ function test() {
     return $?
 }
 
-MAIN_FILE="${SOURCE_PATH}/main.py"
+MAIN_FILE="${SOURCE_PATH}/menu-app/main.py"
+
+INIT_PATH=$PWD
 
 check_base_dir
 
@@ -92,11 +94,13 @@ fi
 printf "Building Broker Package"
 cd $CURRENT_DIR
 cd $BROKER_PATH
-python3 -m build
+# python3 -m build
+pip install --upgrade .
 if [ $? -ne 0 ]; then
     printf "Couldn't build broker package, exiting...\n"
     exit 1
 fi
 
 
+cd $INIT_PATH
 ${MAIN_FILE}

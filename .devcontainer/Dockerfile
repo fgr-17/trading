@@ -6,9 +6,5 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 
 RUN python -m pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    python3 -m pip install --upgrade build
-
-
-
+    pip install -r requirements.txt
 # RUN /workspace/menu.py

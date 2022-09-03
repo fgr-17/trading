@@ -3,21 +3,22 @@
 """ Basic access and management for pyhomebroker APIs """
 
 import datetime
+import requests
 
 from pyhomebroker.common.exceptions import SessionException
 import pyhomebroker as phb
-import requests
 
 from .auth import Auth
+
 
 class HbInterface:
     """ pyhomebroker interface manager """
 
     def __init__(self):
         """ Create the basic authentication """
-        self.auth = auth.Auth.from_file("../bin/Authfile")
+        self.auth = Auth.from_file("../bin/Authfile")
         if self.auth is None:
-            self.auth = auth.Auth.from_stdin()
+            self.auth = Auth.from_stdin()
 
     def print_auth_data(self):
         """ print all the auth data """
@@ -100,7 +101,7 @@ class Broker(HbInterface):
 
         portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta",
                                   cookies=self.broker.auth.cookies,
-                                  json=payload).json()
+                                  json=payload, timeout=10).json()
         return portfolio
 
     def portfolio_get_current_positions(self, portfolio):

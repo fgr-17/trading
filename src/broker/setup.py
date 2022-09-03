@@ -13,10 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-from setuptools import find_packages, setup  
+from setuptools import find_packages, setup
 from broker import __version__
-
 import io
 from os import path
 
@@ -27,14 +25,14 @@ with io.open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name="broker", 
-    version=__version__, 
-    description="Broker wrapper for pyhomebroker", 
+    name="broker",
+    version=__version__,
+    description="Broker wrapper for pyhomebroker",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Federico Roux',
     author_email='rouxfederico@gmail.com',
     platforms=['any'],
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'examples']),
-    install_requires=[pyhomebroker]
+    install_requires=['pyhomebroker']
 )
