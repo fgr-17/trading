@@ -7,7 +7,6 @@ COPY requirements.txt .
 
 RUN python -m pip install --upgrade pip && \
     pip install -r requirements.txt
-# RUN /workspace/menu.py
 
 RUN printf "\nalias ls='ls --color=auto'\n" >> ~/.bashrc
 RUN printf "\nalias ll='ls -alF'\n" >> ~/.bashrc

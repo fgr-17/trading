@@ -105,10 +105,10 @@ class Broker(HbInterface):
         return portfolio
 
     def portfolio_get_current_positions(self, portfolio):
-        ''' list all tickers '''
+        ''' list all assets '''
         portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
         keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
-        portfolio = [{x: ticker[x] for x in keys_to_retrieve} for ticker in portfolio]
+        portfolio = [{x: asset[x] for x in keys_to_retrieve} for asset in portfolio]
         return portfolio
 
     def portfolio_set_new_positions(self, portfolio):
@@ -122,44 +122,44 @@ class Broker(HbInterface):
         subtotal = portfolio[0]["IMPO"]
         return subtotal
 
-    def ticker_get_data(self, ticker, n_days):
-        """ retrieve data from the ticker """
-        data = self.broker.history.get_daily_history(ticker,
+    def asset_get_data(self, asset, n_days):
+        """ retrieve data from the asset """
+        data = self.broker.history.get_daily_history(asset,
                                                      datetime.date.today() - datetime.timedelta(days=n_days),
                                                      datetime.date.today())
         # data.loc[:, "date"] = pd.to_datetime(data.loc[:, "date"])
         # data = data.set_index("date")
         return data
 
-    def ticker_get_current_price(self, ticker):
-        """ get current price of specific ticker [ONLINE]"""
+    def asset_get_current_price(self, asset):
+        """ get current price of specific asset [ONLINE]"""
         # return self.broker.history.get_intraday_history(
-        #     ticker).tail(1).close.values[0]
-        return self.broker.history.get_intraday_history(ticker)
+        #     asset).tail(1).close.values[0]
+        return self.broker.history.get_intraday_history(asset)
 
-    def ticker_get_current_position(self, ticker):
-        ''' get current position of a ticker '''
+    def asset_get_current_position(self, asset):
+        ''' get current position of a asset '''
         portfolio = self.portfolio_get()
         positions_array = portfolio["Result"]["Activos"][1]["Subtotal"]
 
-        ticker_complete = next((item for item in positions_array if item["NERE"] == ticker), None)
+        asset_complete = next((item for item in positions_array if item["NERE"] == asset), None)
 
-        if ticker_complete is not None:
+        if asset_complete is not None:
             keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
-            ticker_ret = {x: ticker_complete[x] for x in keys_to_retrieve}
-            return ticker_ret
+            asset_ret = {x: asset_complete[x] for x in keys_to_retrieve}
+            return asset_ret
 
         return None
 
     # move one layer up
-    # def get_dataset(self, tickers, n_days):
+    # def get_dataset(self, assets, n_days):
     #     """ get the entire dataset """
     #     df_ = []
-    #     for ticker in tickers:
-    #         ticker_data = self.ticker_get_data(ticker, n_days)
-    #         ticker_data = ticker_data.close
-    #         ticker_data.name = ticker
-    #         df_.append(ticker_data)
+    #     for asset in assets:
+    #         asset_data = self.asset_get_data(asset, n_days)
+    #         asset_data = asset_data.close
+    #         asset_data.name = asset
+    #         df_.append(asset_data)
 
     #     return pd.concat(df_, 1)
 
@@ -174,24 +174,24 @@ class Broker(HbInterface):
     #     ])
 
     #     for row in new_portfolio:
-    #         ticker = row[0]
+    #         asset = row[0]
     #         price = row[1]
     #         quantity = row[2]
 
-    #         if ticker in old_portfolio:
-    #             changes[ticker] = [price, quantity - old_portfolio[ticker][1]]
+    #         if asset in old_portfolio:
+    #             changes[asset] = [price, quantity - old_portfolio[asset][1]]
     #         else:
-    #             changes[ticker] = [price, quantity]
+    #             changes[asset] = [price, quantity]
     #     return changes
 
     @staticmethod
     def changes2orders(changes, settlement):
         """ Create orders from change list """
         orders = []
-        for ticker, price_quantity in changes.items():
+        for asset, price_quantity in changes.items():
             price, quantity = price_quantity
             if quantity < 0:
-                order = ("V", ticker, settlement, price, quantity)
+                order = ("V", asset, settlement, price, quantity)
                 orders.append(order)
         return orders
 
