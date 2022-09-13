@@ -1,5 +1,5 @@
 import broker
-import strategy
+from strategy.one_over_n import OneOverN
 
 COCOSAPP_BROKER_ID = 265
 cocos_brk = broker.Broker(COCOSAPP_BROKER_ID)
