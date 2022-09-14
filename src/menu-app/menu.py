@@ -14,7 +14,7 @@ class Menu:
     menu_options = {
         1: 'Start session',
         2: 'End Session',
-        3: 'Get data from ticker',
+        3: 'Get data from asset',
         4: 'Get current portfolio',
         5: 'Get account subtotal',
         6: 'Buy order',
@@ -40,25 +40,27 @@ class Menu:
             logging.info('Cocos session ended')
     
     def option3(self):
-        ''' select a ticker and print info '''
+        ''' select a asset and print info '''
         Tickers.print()
 
-        ticker_no = input('Select a ticker number:')
-        ticker_str = Tickers.get_str(ticker_no)
+        asset_no = input('Select a asset number:')
+        asset_str = Tickers.get_str(asset_no)
 
         days = int(input('Days to search back: '))
 
         print(f'\n===== Ticker info from {days} days =====')
-        print(self.__brk.ticker_get_data(ticker_str, days))
+        # print(self.__brk.asset_get_data(asset_str, days))
 
-        print('\n===== Ticker current price =====')
-        print(self.__brk.ticker_get_current_price(ticker_str))
+        # print('\n===== Ticker current price =====')
+        # current_price = self.__brk.asset_get_current_price(asset_str)
+        # print(type(current_price))
+        print(self.__brk.get_price(asset_str, days))
 
         print('\n===== Ticker current position =====')
-        current_pos = self.__brk.ticker_get_current_position(ticker_str)
+        current_pos = self.__brk.asset_get_current_position(asset_str)
         if current_pos is not None:
             print(current_pos)
-            logging.info(f'Getting info from {ticker_str}, {days} days ago')
+            logging.info(f'Getting info from {asset_str}, {days} days ago')
         else:
             logging.info('Ticker position not found')
 
@@ -82,36 +84,36 @@ class Menu:
         ''' buy order '''
         Tickers.print()
 
-        ticker_no = input('Select a ticker number:')
-        ticker_str = Tickers.get_str(ticker_no)
+        asset_no = input('Select a asset number:')
+        asset_str = Tickers.get_str(asset_no)
 
         print('\n===== Ticker current price =====')
-        print(self.__brk.ticker_get_current_price(ticker_str))
+        print(self.__brk.asset_get_current_price(asset_str))
 
         price = input("Enter buying price:")
         quant = input("Enter quantity:")
-        print(self.__brk.order_buy(ticker_str, "48hs", float(price), int(float(quant))))
+        print(self.__brk.order_buy(asset_str, "48hs", float(price), int(float(quant))))
         logging.info("attempted to buy {ticket_str} price: {price} size: {quant}")
 
     def option7(self):
         ''' sell order '''
         Tickers.print()
 
-        ticker_no = input('Select a ticker number:')
-        ticker_str = Tickers.get_str(ticker_no)
+        asset_no = input('Select a asset number:')
+        asset_str = Tickers.get_str(asset_no)
 
         print('\n===== Ticker current price =====')
-        print(self.__brk.ticker_get_current_price(ticker_str))
+        print(self.__brk.asset_get_current_price(asset_str))
 
         print('\n===== Ticker current position =====')
-        current_pos = self.__brk.ticker_get_current_position(ticker_str)
+        current_pos = self.__brk.asset_get_current_position(asset_str)
 
         if current_pos is not None:
             print(current_pos)
 
             price = input("Enter selling price:")
             quant = input("Enter quantity:")
-            print(self.__brk.order_sell(ticker_str, "48hs", float(price), int(float(quant))))
+            print(self.__brk.order_sell(asset_str, "48hs", float(price), int(float(quant))))
             logging.info("attempted to sell {ticket_str} price: {price} size: {quant}")
         else:
             print('Ticker position not found')

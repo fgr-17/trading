@@ -8,7 +8,7 @@ from menu import Menu
 import broker as brk
 
 COCOSAPP_BROKER_ID = 265
-cocos_brk = brk.Broker(COCOSAPP_BROKER_ID)
+cocos_brk = brk.Broker(COCOSAPP_BROKER_ID, 0)
 
 if __name__ == '__main__':
 

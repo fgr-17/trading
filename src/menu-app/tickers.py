@@ -5,8 +5,8 @@ class Tickers:
 
     @classmethod
     def print(cls):
-        for index, ticker in enumerate(cls._tickers):
-            print(f'{index}: {ticker}')
+        for index, asset in enumerate(cls._tickers):
+            print(f'{index}: {asset}')
 
     @classmethod
     def get_str(cls, index):

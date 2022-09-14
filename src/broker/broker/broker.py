@@ -3,6 +3,7 @@
 """ Basic access and management for pyhomebroker APIs """
 
 import datetime
+from re import L
 import requests
 
 from pyhomebroker.common.exceptions import SessionException
@@ -52,11 +53,12 @@ class HbInterface:
 class Broker(HbInterface):
     """ general broker class """
 
-    def __init__(self, code):
+    def __init__(self, code, delta):
         """ Basic constructor """
         super().__init__()
         self.code = code
         self.broker = None
+        self.delta = delta   # check if integer
 
     def start_session(self):
         """ Init broker session """
@@ -122,10 +124,10 @@ class Broker(HbInterface):
         subtotal = portfolio[0]["IMPO"]
         return subtotal
 
-    def asset_get_data(self, asset, n_days):
+    def asset_get_data(self, asset, delta):
         """ retrieve data from the asset """
         data = self.broker.history.get_daily_history(asset,
-                                                     datetime.date.today() - datetime.timedelta(days=n_days),
+                                                     datetime.date.today() - datetime.timedelta(days=delta),
                                                      datetime.date.today())
         # data.loc[:, "date"] = pd.to_datetime(data.loc[:, "date"])
         # data = data.set_index("date")
@@ -136,6 +138,28 @@ class Broker(HbInterface):
         # return self.broker.history.get_intraday_history(
         #     asset).tail(1).close.values[0]
         return self.broker.history.get_intraday_history(asset)
+
+    def __price_fn_zero(self, asset):
+        """ function to return price with no delta """
+        if self.delta == 0:
+            self.asset_get_current_price(asset)
+        else:
+            self.asset_get_data(asset, self.delta)
+    
+    def __price_fn_delta(self, asset, delta):
+        """ function to return asset price with time delta """
+        real_delta = delta + self.delta
+        if real_delta == 0:
+            return None
+        else:
+            self.asset_get_data(asset, real_delta)
+
+    def get_price(self, asset, delta):
+        """ general price function """
+        if delta == 0:
+            return self.__price_fn_zero(asset)
+        elif delta > 0:
+            return self.__price_fn_delta(asset, int(delta))
 
     def asset_get_current_position(self, asset):
         ''' get current position of a asset '''
