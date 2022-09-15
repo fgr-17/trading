@@ -137,22 +137,26 @@ class Broker(HbInterface):
         """ get current price of specific asset [ONLINE]"""
         # return self.broker.history.get_intraday_history(
         #     asset).tail(1).close.values[0]
-        return self.broker.history.get_intraday_history(asset)
+        ret =  self.broker.history.get_intraday_history(asset)
+        if len(ret) != 0:
+            return ret.iloc[-1]
+        else:
+            return None
 
     def __price_fn_zero(self, asset):
         """ function to return price with no delta """
         if self.delta == 0:
-            self.asset_get_current_price(asset)
+            return self.asset_get_current_price(asset)
         else:
-            self.asset_get_data(asset, self.delta)
+            return self.asset_get_data(asset, self.delta).iloc[0]
     
     def __price_fn_delta(self, asset, delta):
         """ function to return asset price with time delta """
         real_delta = delta + self.delta
-        if real_delta == 0:
+        if real_delta <= 0:
             return None
         else:
-            self.asset_get_data(asset, real_delta)
+            return self.asset_get_data(asset, real_delta).iloc[0]
 
     def get_price(self, asset, delta):
         """ general price function """
