@@ -1,15 +1,16 @@
-import os
-import broker as brk
-from tickers import Tickers
+""" Menu for CLI app """
+
 import logging
-
 import json
+from tickers import Tickers
 
-class Menu:
 
-    def __init__(self, brk):
+class Menu():
+    """ Basic menu mgmt """
+
+    def __init__(self, brok):
         ''' main menu'''
-        self.__brk = brk
+        self.__brk = brok
 
     menu_options = {
         1: 'Start session',
@@ -26,8 +27,8 @@ class Menu:
         ''' print menu options '''
 
         print("\n============================")
-        for key in self.menu_options.keys():
-            print(key, '--', self.menu_options[key] )
+        for key, label in self.menu_options.items():
+            print(key, '--', label)
 
     def option1(self):
         ''' start broker session '''
@@ -38,7 +39,7 @@ class Menu:
         ''' end broker session '''
         if self.__brk.end_session() is True:
             logging.info('Cocos session ended')
-    
+
     def option3(self):
         ''' select a asset and print info '''
         Tickers.print()
@@ -60,22 +61,22 @@ class Menu:
         current_pos = self.__brk.asset_get_current_position(asset_str)
         if current_pos is not None:
             print(current_pos)
-            logging.info(f'Getting info from {asset_str}, {days} days ago')
+            logging.info('Getting info from %s, %i days ago', asset_str, days)
         else:
             logging.info('Ticker position not found')
 
     def option4(self):
         ''' print all portfolio '''
-        pf = self.__brk.portfolio_get()
-        data = self.__brk.portfolio_get_current_positions(pf)
+        portf = self.__brk.portfolio_get()
+        data = self.__brk.portfolio_get_current_positions(portf)
         json_data = json.dumps(data, indent=2)
         print(json_data)
         logging.info('Getting complete portfolio')
 
     def option5(self):
         ''' get current account subtotal '''
-        pf = self.__brk.portfolio_get()
-        data = self.__brk.portfolio_get_curr_account_subtotal(pf)
+        portf = self.__brk.portfolio_get()
+        data = self.__brk.portfolio_get_curr_account_subtotal(portf)
         json_data = json.dumps(data, indent=2)
         print(json_data)
         logging.info('Getting account subtotal')
@@ -118,16 +119,16 @@ class Menu:
         else:
             print('Ticker position not found')
 
-
     def loop(self):
-        while(True):
+        """ Main app loop """
+        while True:
             self.print()
             option = ''
             try:
                 option = int(input('Enter your choice: '))
-            except:
+            except ValueError:
                 print('Wrong input. Please enter a number ...')
-            #Check what choice was entered and act accordingly
+
             if option == 1:
                 self.option1()
             elif option == 2:
@@ -144,6 +145,6 @@ class Menu:
                 self.option7()
             elif option == 8:
                 print('Exiting...')
-                os._exit(1)
+                return 0
             else:
                 print('Invalid option. Please enter a number between 1 and 4.')

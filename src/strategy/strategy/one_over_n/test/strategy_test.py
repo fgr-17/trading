@@ -15,8 +15,6 @@ class TestStrategy(unittest.TestCase):
         self.assertEqual(0, 0)
 
 
-
-
 def suite():
     suite = unittest.TestSuite()
     return suite

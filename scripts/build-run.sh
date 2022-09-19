@@ -1,6 +1,7 @@
 #!/bin/bash
 
-MAX_LINE_LENGTH=200
+PYLINT_MAX_LINE_LENGTH=200
+PYLINT_MAX_ARGS=6
 SOURCE_PATH='../src'
 CURRENT_DIR=$(pwd)
 
@@ -11,8 +12,12 @@ normal=$(tput sgr0)
 
 packages=(
     "menu-app/main.py"
+    "menu-app/menu.py"
+    "menu-app/tickers.py"
     "broker/broker"
     "broker/broker/auth"
+    "strategy/strategy"
+    "strategy_app/strategy_app.py"
 )
 
 function check_base_dir() {
@@ -33,7 +38,7 @@ function style() {
 
     for package in ${packages[@]}; do
         printf "\t> Checking $package..."
-        pycodestyle --format=pylint --max-line-length=$MAX_LINE_LENGTH "${SOURCE_PATH}/$package" --exclude='*build*'
+        pycodestyle --format=pylint --max-line-length=$PYLINT_MAX_LINE_LENGTH "${SOURCE_PATH}/$package" --exclude='*build*'
 
         if [ $? -ne 0 ]; then
             return 1
@@ -50,7 +55,7 @@ function lint() {
 
     for package in ${packages[@]}; do
         printf "\t> Checking $package..."
-        pylint --max-line-length=$MAX_LINE_LENGTH $SOURCE_PATH/$package
+        pylint --max-line-length=$PYLINT_MAX_LINE_LENGTH --max-args=$PYLINT_MAX_ARGS  $SOURCE_PATH/$package
 
         if [ $? -ne 0 ]; then
             return 1

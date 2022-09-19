@@ -3,13 +3,48 @@
 """ Basic access and management for pyhomebroker APIs """
 
 import datetime
-from re import L
 import requests
 
 from pyhomebroker.common.exceptions import SessionException
 import pyhomebroker as phb
 
 from .auth import Auth
+
+
+class Candle:
+    """ Candle object mgmt """
+
+    def __init__(self, openv: float, close: float, high: float, low: float, vol: float):
+        """ Init candle object """
+        self.__open = openv
+        self.__close = close
+        self.__high = high
+        self.__low = low
+        self.__vol = vol
+
+    def get_low(self) -> float:
+        """ Return low value """
+        return self.__low
+
+    def get_high(self) -> float:
+        """ Return high value """
+        return self.__high
+
+    def get_open(self) -> float:
+        """ Return open value """
+        return self.__open
+
+    def get_close(self) -> float:
+        """ Return close value """
+        return self.__close
+
+    def get_vol(self) -> float:
+        """ Return volume """
+        return self.__vol
+
+    def get_ave(self):
+        """ Return average """
+        return (self.__open + self.__close)/2
 
 
 class HbInterface:
@@ -137,33 +172,36 @@ class Broker(HbInterface):
         """ get current price of specific asset [ONLINE]"""
         # return self.broker.history.get_intraday_history(
         #     asset).tail(1).close.values[0]
-        ret =  self.broker.history.get_intraday_history(asset)
+        ret = self.broker.history.get_intraday_history(asset)
         if len(ret) != 0:
-            return ret.iloc[-1]
-        else:
-            return None
+            candle = Candle(ret.iloc[-1]('open'), ret.iloc[-1]('close'), ret.iloc[-1]('high'), ret.iloc[-1]('low'), ret.iloc[-1]('volume'))
+            return candle
+
+        return None
 
     def __price_fn_zero(self, asset):
         """ function to return price with no delta """
         if self.delta == 0:
             return self.asset_get_current_price(asset)
-        else:
-            return self.asset_get_data(asset, self.delta).iloc[0]
-    
+
+        return self.asset_get_data(asset, self.delta).iloc[0]
+
     def __price_fn_delta(self, asset, delta):
         """ function to return asset price with time delta """
         real_delta = delta + self.delta
         if real_delta <= 0:
             return None
-        else:
-            return self.asset_get_data(asset, real_delta).iloc[0]
+
+        return self.asset_get_data(asset, real_delta).iloc[0]
 
     def get_price(self, asset, delta):
         """ general price function """
         if delta == 0:
             return self.__price_fn_zero(asset)
-        elif delta > 0:
+        if delta > 0:
             return self.__price_fn_delta(asset, int(delta))
+
+        raise ValueError
 
     def asset_get_current_position(self, asset):
         ''' get current position of a asset '''

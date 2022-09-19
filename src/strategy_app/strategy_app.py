@@ -1,3 +1,7 @@
+#!/opt/venv/bin/python
+
+""" Basic strategy test app """
+import sys
 import broker
 from strategy.one_over_n import OneOverN
 
@@ -9,8 +13,8 @@ if __name__ == '__main__':
     if cocos_brk.start_session() is True:
         print('Session started')
     else:
-        exit(1)
-    
+        sys.exit(1)
+
     s1 = OneOverN(cocos_brk, ['ALUA'], 10000)
     r = s1.propose_portfolio()
 
@@ -19,6 +23,6 @@ if __name__ == '__main__':
     if cocos_brk.end_session() is True:
         print('Session finished')
     else:
-        exit(1)
+        sys.exit(1)
 
-    exit(0)
+    sys.exit(0)
