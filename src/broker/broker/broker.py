@@ -184,7 +184,7 @@ class Broker(HbInterface):
         if self.delta == 0:
             return self.asset_get_current_price(asset)
 
-        return self.asset_get_data(asset, self.delta).iloc[0]
+        return Broker.dict2candle(self.asset_get_data(asset, self.delta).iloc[0])
 
     def __price_fn_delta(self, asset, delta):
         """ function to return asset price with time delta """
@@ -260,6 +260,12 @@ class Broker(HbInterface):
                 order = ("V", asset, settlement, price, quantity)
                 orders.append(order)
         return orders
+
+    @staticmethod
+    def dict2candle(dict_info) -> Candle:
+        """ Creates a candle obj from a dict """
+        return Candle(dict_info['open'], dict_info['close'], dict_info['high'], dict_info['close'], dict_info['volume'])
+
 
     # def get_orders(self, old_portfolio, new_portfolio, settlement):
     #     """

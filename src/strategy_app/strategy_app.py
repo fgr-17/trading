@@ -6,7 +6,7 @@ import broker
 from strategy.one_over_n import OneOverN
 
 COCOSAPP_BROKER_ID = 265
-cocos_brk = broker.Broker(COCOSAPP_BROKER_ID, 1)
+cocos_brk = broker.Broker(COCOSAPP_BROKER_ID, 2)
 
 if __name__ == '__main__':
 
@@ -15,10 +15,13 @@ if __name__ == '__main__':
     else:
         sys.exit(1)
 
-    s1 = OneOverN(cocos_brk, ['ALUA'], 10000)
+    tickers = ['ALUA']
+
+    s1 = OneOverN(cocos_brk, tickers, 10000)
     r = s1.propose_portfolio()
 
-    print(s1.portfolio)
+    print('Proposed portfolio 1/N:')
+    print(s1.get_portfolio())
 
     if cocos_brk.end_session() is True:
         print('Session finished')
