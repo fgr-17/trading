@@ -4,6 +4,7 @@
 import sys
 import broker
 from strategy.one_over_n import OneOverN
+from strategy.median_mad import MedianMad
 
 COCOSAPP_BROKER_ID = 265
 cocos_brk = broker.Broker(COCOSAPP_BROKER_ID, 2)
