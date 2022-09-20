@@ -15,7 +15,7 @@ if __name__ == '__main__':
     else:
         sys.exit(1)
 
-    tickers = ['ALUA']
+    tickers = ['ALUA', 'YPFD', 'TXAR', 'PAMP']
 
     s1 = OneOverN(cocos_brk, tickers, 10000)
     r = s1.propose_portfolio()
