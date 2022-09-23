@@ -19,10 +19,14 @@ if __name__ == '__main__':
     tickers = ['ALUA', 'YPFD', 'TXAR', 'PAMP']
 
     s1 = OneOverN(cocos_brk, tickers, 10000)
-    r = s1.propose_portfolio()
-
+    r1 = s1.propose_portfolio()
     print('Proposed portfolio 1/N:')
     print(s1.get_portfolio())
+
+    s2 = MedianMad(cocos_brk, tickers, 10000, 60)
+    r2 = s2.propose_portfolio()
+    print('Proposed portfolio Median/Mad:')
+    print(s2.get_portfolio())
 
     if cocos_brk.end_session() is True:
         print('Session finished')

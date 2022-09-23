@@ -192,7 +192,7 @@ class Broker(HbInterface):
         if real_delta <= 0:
             return None
 
-        return self.asset_get_data(asset, real_delta).iloc[0]
+        return Broker.dict2candle(self.asset_get_data(asset, real_delta).iloc[0])
 
     def get_price(self, asset, delta):
         """ general price function """
