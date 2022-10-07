@@ -11,6 +11,42 @@ import pyhomebroker as phb
 from .auth import Auth
 
 
+class Candle:
+    """ Candle object mgmt """
+
+    def __init__(self, openv: float, close: float, high: float, low: float, vol: float):
+        """ Init candle object """
+        self.__open = openv
+        self.__close = close
+        self.__high = high
+        self.__low = low
+        self.__vol = vol
+
+    def get_low(self) -> float:
+        """ Return low value """
+        return self.__low
+
+    def get_high(self) -> float:
+        """ Return high value """
+        return self.__high
+
+    def get_open(self) -> float:
+        """ Return open value """
+        return self.__open
+
+    def get_close(self) -> float:
+        """ Return close value """
+        return self.__close
+
+    def get_vol(self) -> float:
+        """ Return volume """
+        return self.__vol
+
+    def get_ave(self):
+        """ Return average """
+        return (self.__open + self.__close)/2
+
+
 class HbInterface:
     """ pyhomebroker interface manager """
 
@@ -52,11 +88,12 @@ class HbInterface:
 class Broker(HbInterface):
     """ general broker class """
 
-    def __init__(self, code):
+    def __init__(self, code, delta):
         """ Basic constructor """
         super().__init__()
         self.code = code
         self.broker = None
+        self.delta = delta   # check if integer
 
     def start_session(self):
         """ Init broker session """
@@ -105,10 +142,10 @@ class Broker(HbInterface):
         return portfolio
 
     def portfolio_get_current_positions(self, portfolio):
-        ''' list all tickers '''
+        ''' list all assets '''
         portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
         keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
-        portfolio = [{x: ticker[x] for x in keys_to_retrieve} for ticker in portfolio]
+        portfolio = [{x: asset[x] for x in keys_to_retrieve} for asset in portfolio]
         return portfolio
 
     def portfolio_set_new_positions(self, portfolio):
@@ -122,44 +159,73 @@ class Broker(HbInterface):
         subtotal = portfolio[0]["IMPO"]
         return subtotal
 
-    def ticker_get_data(self, ticker, n_days):
-        """ retrieve data from the ticker """
-        data = self.broker.history.get_daily_history(ticker,
-                                                     datetime.date.today() - datetime.timedelta(days=n_days),
+    def asset_get_data(self, asset, delta):
+        """ retrieve data from the asset """
+        data = self.broker.history.get_daily_history(asset,
+                                                     datetime.date.today() - datetime.timedelta(days=delta),
                                                      datetime.date.today())
         # data.loc[:, "date"] = pd.to_datetime(data.loc[:, "date"])
         # data = data.set_index("date")
         return data
 
-    def ticker_get_current_price(self, ticker):
-        """ get current price of specific ticker [ONLINE]"""
+    def asset_get_current_price(self, asset):
+        """ get current price of specific asset [ONLINE]"""
         # return self.broker.history.get_intraday_history(
-        #     ticker).tail(1).close.values[0]
-        return self.broker.history.get_intraday_history(ticker)
+        #     asset).tail(1).close.values[0]
+        ret = self.broker.history.get_intraday_history(asset)
+        if len(ret) != 0:
+            candle = Candle(ret.iloc[-1]('open'), ret.iloc[-1]('close'), ret.iloc[-1]('high'), ret.iloc[-1]('low'), ret.iloc[-1]('volume'))
+            return candle
 
-    def ticker_get_current_position(self, ticker):
-        ''' get current position of a ticker '''
+        return None
+
+    def __price_fn_zero(self, asset):
+        """ function to return price with no delta """
+        if self.delta == 0:
+            return self.asset_get_current_price(asset)
+
+        return Broker.dict2candle(self.asset_get_data(asset, self.delta).iloc[0])
+
+    def __price_fn_delta(self, asset, delta):
+        """ function to return asset price with time delta """
+        real_delta = delta + self.delta
+        if real_delta <= 0:
+            return None
+
+        return Broker.dict2candle(self.asset_get_data(asset, real_delta).iloc[0])
+
+    def get_price(self, asset, delta):
+        """ general price function """
+        if delta == 0:
+            return self.__price_fn_zero(asset)
+        if delta > 0:
+            return self.__price_fn_delta(asset, int(delta))
+
+        raise ValueError
+
+    def asset_get_current_position(self, asset):
+        ''' get current position of a asset '''
         portfolio = self.portfolio_get()
         positions_array = portfolio["Result"]["Activos"][1]["Subtotal"]
 
-        ticker_complete = next((item for item in positions_array if item["NERE"] == ticker), None)
+        asset_complete = next((item for item in positions_array if item["NERE"] == asset), None)
 
-        if ticker_complete is not None:
+        if asset_complete is not None:
             keys_to_retrieve = ['NERE', 'PCIO', 'CANT']
-            ticker_ret = {x: ticker_complete[x] for x in keys_to_retrieve}
-            return ticker_ret
+            asset_ret = {x: asset_complete[x] for x in keys_to_retrieve}
+            return asset_ret
 
         return None
 
     # move one layer up
-    # def get_dataset(self, tickers, n_days):
+    # def get_dataset(self, assets, n_days):
     #     """ get the entire dataset """
     #     df_ = []
-    #     for ticker in tickers:
-    #         ticker_data = self.ticker_get_data(ticker, n_days)
-    #         ticker_data = ticker_data.close
-    #         ticker_data.name = ticker
-    #         df_.append(ticker_data)
+    #     for asset in assets:
+    #         asset_data = self.asset_get_data(asset, n_days)
+    #         asset_data = asset_data.close
+    #         asset_data.name = asset
+    #         df_.append(asset_data)
 
     #     return pd.concat(df_, 1)
 
@@ -174,26 +240,32 @@ class Broker(HbInterface):
     #     ])
 
     #     for row in new_portfolio:
-    #         ticker = row[0]
+    #         asset = row[0]
     #         price = row[1]
     #         quantity = row[2]
 
-    #         if ticker in old_portfolio:
-    #             changes[ticker] = [price, quantity - old_portfolio[ticker][1]]
+    #         if asset in old_portfolio:
+    #             changes[asset] = [price, quantity - old_portfolio[asset][1]]
     #         else:
-    #             changes[ticker] = [price, quantity]
+    #             changes[asset] = [price, quantity]
     #     return changes
 
     @staticmethod
     def changes2orders(changes, settlement):
         """ Create orders from change list """
         orders = []
-        for ticker, price_quantity in changes.items():
+        for asset, price_quantity in changes.items():
             price, quantity = price_quantity
             if quantity < 0:
-                order = ("V", ticker, settlement, price, quantity)
+                order = ("V", asset, settlement, price, quantity)
                 orders.append(order)
         return orders
+
+    @staticmethod
+    def dict2candle(dict_info) -> Candle:
+        """ Creates a candle obj from a dict """
+        return Candle(dict_info['open'], dict_info['close'], dict_info['high'], dict_info['close'], dict_info['volume'])
+
 
     # def get_orders(self, old_portfolio, new_portfolio, settlement):
     #     """

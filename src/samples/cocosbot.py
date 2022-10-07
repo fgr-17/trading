@@ -57,12 +57,12 @@ tickers = [
 
 ## algunas funciones auxiliares: 
 
-def ticker_get_data(hb, ticker, n_dias):
+def ticker_get_data(hb, asset, n_dias):
     ''' Toma una lista de tickers y un objeto homebroker y 
         busca los precios desde hoy hasta n_dias atras.
         Devuelve un dataframe con esa data. '''
     
-    data = hb.history.get_daily_history(ticker, 
+    data = hb.history.get_daily_history(asset, 
                                         datetime.date.today() - datetime.timedelta(days=n_dias),
                                         datetime.date.today()
                                        )
@@ -73,7 +73,7 @@ def ticker_get_data(hb, ticker, n_dias):
 
 
 def get_dataset(hb, tickers, n_dias):
-    ''' Toma una lista de tickers y un objeto homebroker. Para cada ticker llama
+    ''' Toma una lista de tickers y un objeto homebroker. Para cada asset llama
         a la funcion ticker_get_datas y se queda con el precio de cierre.
         Concatena todas las Series en un dataframe y lo devuelve. '''
     
@@ -87,9 +87,9 @@ def get_dataset(hb, tickers, n_dias):
     return pd.concat(df,1)
 
 
-def ticker_get_current_price(hb, ticker):
-    ''' Devuelve el precio actual de un ticker '''
-    return hb.history.get_intraday_history(ticker).tail(1).close.values[0]
+def ticker_get_current_price(hb, asset):
+    ''' Devuelve el precio actual de un asset '''
+    return hb.history.get_intraday_history(asset).tail(1).close.values[0]
 
 df = get_dataset(hb,tickers, n_dias)
 
@@ -134,7 +134,7 @@ def get_1overN_portfolio(hb, tickers, capital):
         en la cantidad de tickers, obtiene el precio actual de la accion,
         la redondea segun las reglas de round_price y calcula cuantas puede
         comprar. 
-        Devuelve una lista de tuplas, donde cada tupla tiene ticker, precio 
+        Devuelve una lista de tuplas, donde cada tupla tiene asset, precio 
         y cantidad a comprar.'''
     
     money_per_asset = capital/len(tickers)
@@ -150,7 +150,7 @@ def get_1overN_portfolio(hb, tickers, capital):
 portfolio = get_1overN_portfolio(hb, portfolio_tickers, capital)
 
 ## este es el portfolio que nos queda: 
-## una lista de tuplas. En cada tupla: ticker, precio y cantidad
+## una lista de tuplas. En cada tupla: asset, precio y cantidad
 portfolio
 
 """Iteramos sobre cada tupla del portfolio y llamamos al método "send_order_buys" para hacer las compras:"""
@@ -187,7 +187,7 @@ def portfolio_get_current_positions(hb, comitente):
     portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
     portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
     
-    ## esto devuelve el ticker, el precio y la cantidad que tenes
+    ## esto devuelve el asset, el precio y la cantidad que tenes
     portfolio = [( x["NERE"], float(x["PCIO"]), float(x["CANT"]) ) for x in portfolio]
     return portfolio
 
@@ -207,14 +207,14 @@ def get_changes(old_portfolio, new_portfolio):
     ])
     
     for row in new_portfolio:
-        ticker = row[0]
+        asset = row[0]
         price = row[1]
         quantity = row[2]
         
-        if ticker in old_portfolio:
-            changes[ticker] = [price, quantity - old_portfolio[ticker][1]]
+        if asset in old_portfolio:
+            changes[asset] = [price, quantity - old_portfolio[asset][1]]
         else:
-            changes[ticker] = [price, quantity]
+            changes[asset] = [price, quantity]
     return changes
 
 def changes2orders(changes, plazo):
@@ -224,10 +224,10 @@ def changes2orders(changes, plazo):
         que vamos a usar para rebalancear '''
     
     orders = []
-    for ticker, price_quantity in changes.items():
+    for asset, price_quantity in changes.items():
         price, quantity = price_quantity
         if quantity < 0:
-            order = ("V",ticker,plazo,price, quantity )
+            order = ("V",asset,plazo,price, quantity )
             orders.append(order)
     return orders
 

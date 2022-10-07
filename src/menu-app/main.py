@@ -1,4 +1,5 @@
 #!/opt/venv/bin/python
+
 """Main routine"""
 import sys
 import logging
@@ -8,7 +9,8 @@ from menu import Menu
 import broker as brk
 
 COCOSAPP_BROKER_ID = 265
-cocos_brk = brk.Broker(COCOSAPP_BROKER_ID)
+cocos_brk = brk.Broker(COCOSAPP_BROKER_ID, 1)
+
 
 if __name__ == '__main__':
 

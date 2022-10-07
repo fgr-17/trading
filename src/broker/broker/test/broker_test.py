@@ -22,7 +22,7 @@ class TestHbAuth(unittest.TestCase):
 class TestBroker(unittest.TestCase):
 
     def test_constructor_ok(self):
-        b = Broker(265)
+        b = Broker(265, 1)
         assert b is not None
 
     def test_start_session(self):

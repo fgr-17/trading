@@ -34,7 +34,7 @@ class Menu:
     menu_options = {
         1: 'Start session',
         2: 'End Session',
-        3: 'Get data from ticker',
+        3: 'Get data from asset',
         4: 'Get current portfolio',
         5: 'Get account subtotal',
         6: 'Buy order',
@@ -60,10 +60,10 @@ class Menu:
             logging.info('Cocos session ended')
     
     def option3(self):
-        ''' select a ticker and print info '''
+        ''' select a asset and print info '''
         Tickers.print()
 
-        ticker_no = input('Select a ticker number:')
+        ticker_no = input('Select a asset number:')
         ticker_str = Tickers.get_str(ticker_no)
 
         days = int(input('Days to search back: '))
@@ -102,7 +102,7 @@ class Menu:
         ''' buy order '''
         Tickers.print()
 
-        ticker_no = input('Select a ticker number:')
+        ticker_no = input('Select a asset number:')
         ticker_str = Tickers.get_str(ticker_no)
 
         print('\n===== Ticker current price =====')
@@ -117,7 +117,7 @@ class Menu:
         ''' sell order '''
         Tickers.print()
 
-        ticker_no = input('Select a ticker number:')
+        ticker_no = input('Select a asset number:')
         ticker_str = Tickers.get_str(ticker_no)
 
         print('\n===== Ticker current price =====')

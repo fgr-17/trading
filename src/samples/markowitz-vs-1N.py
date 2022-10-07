@@ -37,14 +37,14 @@ hb.online.connect()
 
 """Codigo auxiliar para bajar data y para redondear precios:"""
 
-def ticker_get_data(hb, ticker, date_from, date_to):
+def ticker_get_data(hb, asset, date_from, date_to):
     ''' Toma una lista de tickers y un objeto homebroker y 
         busca los precios desde date_from hasta date_to.
         Devuelve un dataframe con esa data. '''
     
     date_from = datetime.datetime.strptime(date_from,"%Y-%m-%d").date()
     date_to = datetime.datetime.strptime(date_to,"%Y-%m-%d").date()
-    data = hb.history.get_daily_history(ticker, date_from, date_to)
+    data = hb.history.get_daily_history(asset, date_from, date_to)
     
     data.loc[:,"date"] = pd.to_datetime(data.loc[:,"date"])
     data = data.set_index("date")
@@ -52,7 +52,7 @@ def ticker_get_data(hb, ticker, date_from, date_to):
 
 
 def get_dataset(hb, tickers, date_from, date_to):
-    ''' Toma una lista de tickers y un objeto homebroker. Para cada ticker llama
+    ''' Toma una lista de tickers y un objeto homebroker. Para cada asset llama
         a la funcion ticker_get_datas y se queda con el precio de cierre.
         Concatena todas las Series en un dataframe y lo devuelve. '''
     
@@ -142,7 +142,7 @@ def get_markowitz( mu, covmat):
 def get_basicMarkowitz_portfolio(data, capital):
     
     ''' A partir de data para calcular y capital genero la cantidad de 
-        papeles a comprar de cada ticker utilizando markowitz. 
+        papeles a comprar de cada asset utilizando markowitz. 
         Es una version basica de markowitz. '''
     
     data = data.dropna(1)

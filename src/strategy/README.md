@@ -1,21 +1,40 @@
-""" Menu for CLI app """
+# Broker
 
-import logging
-import json
+Broker is a python package to use as a wrapper for pyhomebroker 
+
+Author: rouxfederico@gmail.com
+
+## Installation
+
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install broker.
+
+```bash
+pip install broker
+```
+
+## Usage
+
+Basic menu:
+
+```python
+
+import os
+import broker as brk
 from tickers import Tickers
+import logging
 
+import json
 
-class Menu():
-    """ Basic menu mgmt """
+class Menu:
 
-    def __init__(self, brok):
+    def __init__(self, brk):
         ''' main menu'''
-        self.__brk = brok
+        self.__brk = brk
 
     menu_options = {
         1: 'Start session',
         2: 'End Session',
-        3: 'Get data from asset',
+        3: 'Get data from ticker',
         4: 'Get current portfolio',
         5: 'Get account subtotal',
         6: 'Buy order',
@@ -27,8 +46,8 @@ class Menu():
         ''' print menu options '''
 
         print("\n============================")
-        for key, label in self.menu_options.items():
-            print(key, '--', label)
+        for key in self.menu_options.keys():
+            print(key, '--', self.menu_options[key] )
 
     def option1(self):
         ''' start broker session '''
@@ -39,44 +58,42 @@ class Menu():
         ''' end broker session '''
         if self.__brk.end_session() is True:
             logging.info('Cocos session ended')
-
+    
     def option3(self):
-        ''' select a asset and print info '''
+        ''' select a ticker and print info '''
         Tickers.print()
 
-        asset_no = input('Select a asset number:')
-        asset_str = Tickers.get_str(asset_no)
+        ticker_no = input('Select a ticker number:')
+        ticker_str = Tickers.get_str(ticker_no)
 
         days = int(input('Days to search back: '))
 
         print(f'\n===== Ticker info from {days} days =====')
-        # print(self.__brk.asset_get_data(asset_str, days))
+        print(self.__brk.ticker_get_data(ticker_str, days))
 
-        # print('\n===== Ticker current price =====')
-        # current_price = self.__brk.asset_get_current_price(asset_str)
-        # print(type(current_price))
-        print(self.__brk.get_price(asset_str, days))
+        print('\n===== Ticker current price =====')
+        print(self.__brk.ticker_get_current_price(ticker_str))
 
         print('\n===== Ticker current position =====')
-        current_pos = self.__brk.asset_get_current_position(asset_str)
+        current_pos = self.__brk.ticker_get_current_position(ticker_str)
         if current_pos is not None:
             print(current_pos)
-            logging.info('Getting info from %s, %i days ago', asset_str, days)
+            logging.info(f'Getting info from {ticker_str}, {days} days ago')
         else:
             logging.info('Ticker position not found')
 
     def option4(self):
         ''' print all portfolio '''
-        portf = self.__brk.portfolio_get()
-        data = self.__brk.portfolio_get_current_positions(portf)
+        pf = self.__brk.portfolio_get()
+        data = self.__brk.portfolio_get_current_positions(pf)
         json_data = json.dumps(data, indent=2)
         print(json_data)
         logging.info('Getting complete portfolio')
 
     def option5(self):
         ''' get current account subtotal '''
-        portf = self.__brk.portfolio_get()
-        data = self.__brk.portfolio_get_curr_account_subtotal(portf)
+        pf = self.__brk.portfolio_get()
+        data = self.__brk.portfolio_get_curr_account_subtotal(pf)
         json_data = json.dumps(data, indent=2)
         print(json_data)
         logging.info('Getting account subtotal')
@@ -85,50 +102,51 @@ class Menu():
         ''' buy order '''
         Tickers.print()
 
-        asset_no = input('Select a asset number:')
-        asset_str = Tickers.get_str(asset_no)
+        ticker_no = input('Select a ticker number:')
+        ticker_str = Tickers.get_str(ticker_no)
 
         print('\n===== Ticker current price =====')
-        print(self.__brk.asset_get_current_price(asset_str))
+        print(self.__brk.ticker_get_current_price(ticker_str))
 
         price = input("Enter buying price:")
         quant = input("Enter quantity:")
-        print(self.__brk.order_buy(asset_str, "48hs", float(price), int(float(quant))))
+        print(self.__brk.order_buy(ticker_str, "48hs", float(price), int(float(quant))))
         logging.info("attempted to buy {ticket_str} price: {price} size: {quant}")
 
     def option7(self):
         ''' sell order '''
         Tickers.print()
 
-        asset_no = input('Select a asset number:')
-        asset_str = Tickers.get_str(asset_no)
+        ticker_no = input('Select a ticker number:')
+        ticker_str = Tickers.get_str(ticker_no)
 
         print('\n===== Ticker current price =====')
-        print(self.__brk.asset_get_current_price(asset_str))
+        print(self.__brk.ticker_get_current_price(ticker_str))
 
         print('\n===== Ticker current position =====')
-        current_pos = self.__brk.asset_get_current_position(asset_str)
+        current_pos = self.__brk.ticker_get_current_position(ticker_str)
 
         if current_pos is not None:
             print(current_pos)
 
             price = input("Enter selling price:")
             quant = input("Enter quantity:")
-            print(self.__brk.order_sell(asset_str, "48hs", float(price), int(float(quant))))
+            print(self.__brk.order_sell(ticker_str, "48hs", float(price), int(float(quant))))
             logging.info("attempted to sell {ticket_str} price: {price} size: {quant}")
+
         else:
             print('Ticker position not found')
 
+
     def loop(self):
-        """ Main app loop """
-        while True:
+        while(True):
             self.print()
             option = ''
             try:
                 option = int(input('Enter your choice: '))
-            except ValueError:
+            except:
                 print('Wrong input. Please enter a number ...')
-
+            #Check what choice was entered and act accordingly
             if option == 1:
                 self.option1()
             elif option == 2:
@@ -145,6 +163,18 @@ class Menu():
                 self.option7()
             elif option == 8:
                 print('Exiting...')
-                return 0
+                os._exit(1)
             else:
                 print('Invalid option. Please enter a number between 1 and 4.')
+
+
+```
+
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+Check LICENSE file
